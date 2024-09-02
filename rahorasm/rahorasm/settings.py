@@ -43,7 +43,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
-
+    'UserManager',
 ]
 
 MIDDLEWARE = [
@@ -132,3 +132,11 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
+
+
+
+
+MAX_OTP_TRY = 3
+AUTH_USER_MODEL = 'UserManager.UserModel'
