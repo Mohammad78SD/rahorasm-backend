@@ -38,7 +38,7 @@ class LoginRequestOTPView(APIView):
             
             # Check if an OTP was generated in the last 60 seconds
             if cache.get(f"otp_cooldown_{phone_number}"):
-                return Response({"message": f"کد یکبار مصرف به تازگی ارسال شده لطفا {cache.get(f"otp_cooldown_{phone_number}")} دیگر مجددا تلاش نمایید"}, 
+                return Response({"message": "کد یکبار مصرف به تازگی ارسال شده لطفا چند دقیقه دیگر مجددا تلاش نمایید"}, 
                                 status=status.HTTP_429_TOO_MANY_REQUESTS)
             
             # Generate OTP
@@ -50,7 +50,7 @@ class LoginRequestOTPView(APIView):
             # Set cooldown
             cache.set(f"otp_cooldown_{phone_number}", True, 60)
             print(otp)
-            # send_otp(phone_number, otp)
+            send_otp(phone_number, otp)
             
             return Response({"message": "کد یکبار مصرف با موفقیت ارسال شد"}, status=status.HTTP_200_OK)
         return Response({'message': 'اطلاعات وارد شده صحیح نمی باشد'}, status=status.HTTP_400_BAD_REQUEST)
