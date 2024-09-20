@@ -1,12 +1,12 @@
-from rest_framework import status
+from rest_framework import status, generics
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from .serializers import LoginSerializer, OTPRequestSerializer, OTPValidateSerializer, SignupSerializer
+from .serializers import LoginSerializer, OTPRequestSerializer, OTPValidateSerializer, SignupSerializer, ContactUsSerializer
 from django.contrib.auth import authenticate, login
 from django.core.cache import cache
 import random
 from .utils import send_otp
-from .models import UserModel as User
+from .models import UserModel as User, ContactForm
 from rest_framework.permissions import IsAuthenticated
 
 class LoginView(APIView):      
@@ -136,3 +136,8 @@ class UserSessionView(APIView):
                 'is_staff': user.is_staff,
             }
             return Response({"payload": session_data}, status=status.HTTP_200_OK)
+        
+        
+class ContactUsView(generics.CreateAPIView):
+    queryset = ContactForm.objects.all()
+    serializer_class = ContactUsSerializer

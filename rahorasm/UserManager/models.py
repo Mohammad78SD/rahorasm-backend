@@ -90,3 +90,19 @@ class UserModel(AbstractBaseUser, PermissionsMixin):
         verbose_name_plural = "کاربران"
 
 
+class ContactForm(models.Model):
+    SUBJECT_CHOICES = [
+        ('TourRegistration', 'ثبت نام تور'),
+        ('Suggestions', 'پیشنهادات'),
+        ('Complaints', 'انتقادات'),
+    ]
+    name = models.CharField(max_length=50)
+    phone = models.CharField(max_length=15, validators=[phone_regex])
+    email = models.EmailField(max_length=50)
+    subject = models.CharField(max_length=200, choices=SUBJECT_CHOICES)
+    decription = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        verbose_name = "فرم تماس"
+        verbose_name_plural = "فرم های تماس"
