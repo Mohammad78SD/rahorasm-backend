@@ -14,6 +14,10 @@ class Category(models.Model):
     
     def __str__(self):
         return self.title
+    
+    class Meta:
+        verbose_name = "دسته بندی"
+        verbose_name_plural = "دسته بندی ها"
 
 class Post(models.Model):
     meta_title = models.CharField(max_length=200)
@@ -28,6 +32,9 @@ class Post(models.Model):
     
     def __str__(self):
         return self.title
+    class Meta:
+        verbose_name = "مطلب"
+        verbose_name_plural = "مطالب"
     
     
 class Comment(models.Model):
@@ -37,3 +44,8 @@ class Comment(models.Model):
     created_at = jmodels.jDateTimeField(auto_now_add=True)
     edited_at = jmodels.jDateTimeField(auto_now=True)
     approved = models.BooleanField(default=False)
+    def __str__(self):
+        return self.content
+    class Meta:
+        verbose_name = "دیدگاه"
+        verbose_name_plural = "دیدگاه ها"
