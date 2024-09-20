@@ -43,11 +43,14 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django_filters',
     'rest_framework',
     'django_ckeditor_5',
     'django_jalali',
     'UserManager',
     'blog',
+    'TourManager',
+    'VisaManager',
 ]
 
 MIDDLEWARE = [
