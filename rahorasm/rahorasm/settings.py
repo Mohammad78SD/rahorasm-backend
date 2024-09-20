@@ -245,4 +245,12 @@ CKEDITOR_5_CONFIGS = {
 }
 
 # Define a constant in settings.py to specify file upload permissions
-CKEDITOR_5_FILE_UPLOAD_PERMISSION = "staff"  # Possible values: "staff", "authenticated", "any"
+CKEDITOR_5_FILE_UPLOAD_PERMISSION = "staff"  # Possible values: "staff", "authenticated", "any"\
+    
+    
+    
+    
+    
+CSRF_COOKIE_NAME = 'csrftoken'  # Default value
+CSRF_COOKIE_HTTPONLY = False  # Ensure this is False to access the cookie via JavaScript
+CSRF_COOKIE_SECURE = False  # Set to True if using HTTPS

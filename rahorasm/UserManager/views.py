@@ -91,7 +91,7 @@ class SignupRequestView(APIView):
             # Set cooldown
             cache.set(f"otp_cooldown_{phone_number}", True, 60)
             print(otp)
-            # send_otp(phone_number, otp)
+            send_otp(phone_number, otp)
             
             return Response({"message": "کد یکبار مصرف ارسال شد"}, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
