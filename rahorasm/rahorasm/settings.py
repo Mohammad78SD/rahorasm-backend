@@ -146,7 +146,10 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOW_CREDENTIALS = True
 
-
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:3000",  # Adjust this to your frontend's URL
+    "http://5.161.155.143",  # If accessing directly via IP
+]
 
 
 MAX_OTP_TRY = 3
