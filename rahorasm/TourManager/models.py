@@ -1,8 +1,32 @@
 from django.db import models
 from django_jalali.db import models as jmodels
 
+class Continent(models.Model):
+    name = models.CharField(max_length=200)
+    description = models.TextField(null=True, blank=True)
+    created_at = jmodels.jDateTimeField(auto_now_add=True)
+    edited_at = jmodels.jDateTimeField(auto_now=True)
+    def __str__(self):
+        return self.name
+    class Meta:
+        verbose_name = "قاره"
+        verbose_name_plural = "قاره ها"
+        
+class Country(models.Model):
+    name = models.CharField(max_length=200)
+    continent = models.ForeignKey(Continent, on_delete=models.PROTECT, null=True, blank=True, related_name='countries')
+    description = models.TextField(null=True, blank=True)
+    created_at = jmodels.jDateTimeField(auto_now_add=True)
+    edited_at = jmodels.jDateTimeField(auto_now=True)
+    def __str__(self):
+        return self.name
+    class Meta:
+        verbose_name = "کشور"
+        verbose_name_plural = "کشور ها"
+        
 class City(models.Model):
     name = models.CharField(max_length=200)
+    country = models.ForeignKey(Country, on_delete=models.PROTECT, null=True, blank=True, related_name='cities')
     description = models.TextField(null=True, blank=True)
     created_at = jmodels.jDateTimeField(auto_now_add=True)
     edited_at = jmodels.jDateTimeField(auto_now=True)
@@ -12,16 +36,6 @@ class City(models.Model):
         verbose_name = "شهر"
         verbose_name_plural = "شهر ها"
     
-class Country(models.Model):
-    name = models.CharField(max_length=200)
-    description = models.TextField(null=True, blank=True)
-    created_at = jmodels.jDateTimeField(auto_now_add=True)
-    edited_at = jmodels.jDateTimeField(auto_now=True)
-    def __str__(self):
-        return self.name
-    class Meta:
-        verbose_name = "کشور"
-        verbose_name_plural = "کشور ها"
 
 class AirLine(models.Model):
     name = models.CharField(max_length=200)
@@ -61,9 +75,10 @@ class Package(models.Model):
     
 class Tour(models.Model):
     title = models.CharField(max_length=200)
-    package = models.ForeignKey(Package, on_delete=models.PROTECT)
+    package = models.ForeignKey(Package, on_delete=models.PROTECT, related_name='tours')
     description = models.TextField()
-    tour_type = models.CharField(max_length=200, choices=[('air', 'هوایی'), ('land', 'زمینی')])
+    tour_type = models.CharField(max_length=200, choices=[('هوایی', 'هوایی'), ('زمینی', 'زمینی')])
+    tour_duration = models.CharField(max_length=200, default='7 روز')
     needed_documents = models.TextField()
     agency_service = models.TextField()
     tour_guide = models.TextField()
