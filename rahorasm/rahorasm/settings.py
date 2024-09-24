@@ -52,6 +52,7 @@ INSTALLED_APPS = [
     'blog',
     'TourManager',
     'VisaManager',
+    'misc',
 ]
 
 MIDDLEWARE = [
