@@ -34,14 +34,14 @@ class TourSerializer(serializers.ModelSerializer):
     airline = AirLineSerializer()
     origin_airport = AirportSerializer()
     destination_airport = AirportSerializer()
-    path = serializers.SerializerMethodField()  # Add path as a serializer method field
+    path = serializers.SerializerMethodField()
 
     class Meta:
         model = Tour
         fields = '__all__'
 
     def get_path(self, obj):
-        return f"/{obj.package.country.name}-tour-{obj.title}"  # Customize the path format as needed
+        return f"/{obj.package.country.name}-tour-{obj.title}"
 
 
 class PackageSerializer(serializers.ModelSerializer):

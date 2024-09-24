@@ -48,11 +48,6 @@ class AirportListView(generics.ListAPIView):
     filter_backends = (DjangoFilterBackend,)
     filterset_class = AirportFilter
 
-# class PackageListView(generics.ListAPIView):
-#     queryset = Package.objects.all()
-#     serializer_class = PackageSerializer
-#     filter_backends = (DjangoFilterBackend,)
-#     filterset_class = PackageFilter
     
 class PackageListView(generics.ListAPIView):
     serializer_class = PackageSerializer
@@ -101,6 +96,10 @@ class TourListView(generics.ListAPIView):
     filter_backends = (DjangoFilterBackend,)
     filterset_class = TourFilter
     
+class TourDetailView(generics.RetrieveAPIView):
+    queryset = Tour.objects.all()
+    serializer_class = TourSerializer
+    
     
 class NavbarAPIView(APIView):
     def get(self, request):
@@ -108,12 +107,11 @@ class NavbarAPIView(APIView):
         continents = Continent.objects.prefetch_related('countries__cities').all()
         continent_data = ContinentSerializer(continents, many=True).data
         
-        # Construct the nested structure for the navbar
         navbar = []
         for continent in continent_data:
             continent_entry = {
                 "id": continent['id'],
-                "name": continent['name'],
+                "name": f"تور {continent['name']}",
                 "children": []
             }
             for country in continent.get('countries', []):
@@ -125,24 +123,29 @@ class NavbarAPIView(APIView):
                 for city in country.get('cities', []):
                     city_entry = {
                         "id": city['id'],
-                        "name": city['name'],
-                        "path": f"/{country['name']}-tour-{city['name']}"  # Customize path as needed
+                        "name": city['name']
                     }
                     country_entry["children"].append(city_entry)
 
                 continent_entry["children"].append(country_entry)
 
             navbar.append(continent_entry)
+        blog = {
+            "id": "200",
+            "name": "وبلاگ",
+            "path": "/blog"
+        }
         about = {
-            "id": "184",
+            "id": "300",
             "name": "درباره ما",
-            "path": "/about"
+            "path": "/about-us"
         }
         contact = {
-            "id": "780",
+            "id": "400",
             "name": "تماس با ما",
-            "path": "/contact"
+            "path": "/contact-us"
         }
+        navbar.append(blog)
         navbar.append(about)
         navbar.append(contact)
         return Response(navbar)
