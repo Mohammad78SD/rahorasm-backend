@@ -26,6 +26,7 @@ urlpatterns = [
     path('blog/', include('blog.urls')),
     path('tour/', include('TourManager.urls')),
     path('visa/', include('VisaManager.urls')),
+    path('api/', include('misc.urls'))
 ]
 
 
