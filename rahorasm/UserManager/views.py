@@ -146,3 +146,10 @@ class UserSessionView(APIView):
 class ContactUsView(generics.CreateAPIView):
     queryset = ContactForm.objects.all()
     serializer_class = ContactUsSerializer
+    
+    
+class LogoutView(APIView):
+    permission_classes = [IsAuthenticated]
+    def post(self, request):
+        request.session.flush()
+        return Response({"message": "با موفقیت خارج شدید"}, status=status.HTTP_200_OK)

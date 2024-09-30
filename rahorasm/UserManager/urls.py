@@ -1,6 +1,6 @@
 from django.urls import path
-from .views import ContactUsView, LoginView, LoginRequestOTPView, LoginValidateOTPView, SignupRequestView, SignupValidateOTPView, UserSessionView
-from django.contrib.auth.views import LogoutView
+from .views import LogoutView, ContactUsView, LoginView, LoginRequestOTPView, LoginValidateOTPView, SignupRequestView, SignupValidateOTPView, UserSessionView
+
 
 urlpatterns = [
     path('login', LoginView.as_view(), name='login'),
