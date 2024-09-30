@@ -82,7 +82,7 @@ class PackageListView(generics.ListAPIView):
 
     filterset_fields = {
         'city': ['exact'],
-        'country': ['exact'],
+        # 'country': ['exact'],
         'created_at': ['gte', 'lte'],
         # Add more filters as needed
     }
@@ -91,10 +91,13 @@ class PackageListView(generics.ListAPIView):
     ordering = ['created_at']  # Default ordering
 
 class TourListView(generics.ListAPIView):
-    queryset = Tour.objects.all()
     serializer_class = TourSerializer
-    filter_backends = (DjangoFilterBackend,)
-    filterset_class = TourFilter
+    def get_queryset(self):
+        continent_name = self.request.query_params.get('continent', None)
+        queryset = Tour.objects.all()
+        if continent_name:
+            queryset = queryset.filter(destination_airport__city__country__continent__name=continent_name)
+        return queryset
     
 class TourDetailView(generics.RetrieveAPIView):
     queryset = Tour.objects.all()
