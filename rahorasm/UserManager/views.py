@@ -78,22 +78,27 @@ class SignupRequestView(APIView):
             return Response({"message": "لطفا فیلد ها را تکمیل کنید."}, status=status.HTTP_400_BAD_REQUEST)
         serializer = SignupSerializer(data=request.data)
         if serializer.is_valid():
-            # Store user data temporarily
-            cache.set(f"signup_{serializer.validated_data['phone_number']}", serializer.validated_data, 300)
-            
             phone_number = serializer.validated_data['phone_number']
-            # Generate OTP
-            otp = str(random.randint(100000, 999999))
-            
-            # Store OTP in cache with 5 minutes expiration
-            cache.set(f"otp_{phone_number}", otp, 300)
-            
-            # Set cooldown
-            cache.set(f"otp_cooldown_{phone_number}", True, 60)
-            print(otp)
-            send_otp(phone_number, otp)
-            
-            return Response({"message": "کد یکبار مصرف ارسال شد"}, status=status.HTTP_200_OK)
+            try:
+                user = User.objects.get(phone_number=phone_number)
+            except User.DoesNotExist:
+
+                # Store user data temporarily
+                cache.set(f"signup_{serializer.validated_data['phone_number']}", serializer.validated_data, 300)
+                
+                # Generate OTP
+                otp = str(random.randint(100000, 999999))
+                
+                # Store OTP in cache with 5 minutes expiration
+                cache.set(f"otp_{phone_number}", otp, 300)
+                
+                # Set cooldown
+                cache.set(f"otp_cooldown_{phone_number}", True, 60)
+                print(otp)
+                send_otp(phone_number, otp)
+                
+                return Response({"message": "کد یکبار مصرف ارسال شد"}, status=status.HTTP_200_OK)
+            return Response({"message": "کاربری با این شماره تلفن وجود دارد"}, status=status.HTTP_400_BAD_REQUEST)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class SignupValidateOTPView(APIView):
