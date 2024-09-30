@@ -14,7 +14,7 @@ class Continent(models.Model):
         
 class Country(models.Model):
     name = models.CharField(max_length=200)
-    continent = models.ForeignKey(Continent, on_delete=models.PROTECT, null=True, blank=True, related_name='countries')
+    continent = models.ForeignKey(Continent, on_delete=models.PROTECT, related_name='countries')
     description = models.TextField(null=True, blank=True)
     created_at = jmodels.jDateTimeField(auto_now_add=True)
     edited_at = jmodels.jDateTimeField(auto_now=True)
@@ -26,7 +26,7 @@ class Country(models.Model):
         
 class City(models.Model):
     name = models.CharField(max_length=200)
-    country = models.ForeignKey(Country, on_delete=models.PROTECT, null=True, blank=True, related_name='cities')
+    country = models.ForeignKey(Country, on_delete=models.PROTECT, related_name='cities')
     description = models.TextField(null=True, blank=True)
     created_at = jmodels.jDateTimeField(auto_now_add=True)
     edited_at = jmodels.jDateTimeField(auto_now=True)
@@ -52,7 +52,6 @@ class Airport(models.Model):
     name = models.CharField(max_length=200)
     short_name = models.CharField(max_length=10)
     city = models.ForeignKey(City, on_delete=models.PROTECT)
-    country = models.ForeignKey(Country, on_delete=models.PROTECT)
     created_at = jmodels.jDateTimeField(auto_now_add=True)
     edited_at = jmodels.jDateTimeField(auto_now=True)
     def __str__(self):
@@ -64,7 +63,6 @@ class Airport(models.Model):
 class Package(models.Model):
     title = models.CharField(max_length=200)
     city = models.ForeignKey(City, on_delete=models.PROTECT)
-    country = models.ForeignKey(Country, on_delete=models.PROTECT)
     created_at = jmodels.jDateTimeField(auto_now_add=True)
     edited_at = jmodels.jDateTimeField(auto_now=True)
     def __str__(self):
