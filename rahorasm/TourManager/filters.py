@@ -28,8 +28,7 @@ class AirportFilter(filters.FilterSet):
         fields = {
             'name': ['exact', 'icontains'],
             'short_name': ['exact', 'icontains'],
-            'city': ['exact'],  # Filter by city ID
-            'country': ['exact'],  # Filter by country ID
+            # 'city': ['exact'],  # Filter by city ID
         }
 
 class PackageFilter(filters.FilterSet):
@@ -37,8 +36,8 @@ class PackageFilter(filters.FilterSet):
         model = Package
         fields = {
             'title': ['exact', 'icontains'],
-            'city': ['exact'],  # Filter by city ID
-            'country': ['exact'],  # Filter by country ID
+            # 'city': ['exact'],  # Filter by city ID
+            # 'country': ['exact'],  # Filter by country ID
         }
 
 class TourFilter(filters.FilterSet):
