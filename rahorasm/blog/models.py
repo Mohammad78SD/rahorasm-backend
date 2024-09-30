@@ -24,7 +24,7 @@ class Post(models.Model):
     meta_description = models.CharField(max_length=200)
     title = models.CharField(max_length=200)
     Category = models.ManyToManyField(Category, related_name='posts', blank=True)
-    image = models.ImageField(upload_to='blog/images/')
+    image = models.ImageField(upload_to='blog/images/', null=True, blank=True)
     author = models.ForeignKey(User, on_delete=models.CASCADE)
     content = CKEditor5Field('Text', config_name='extends')
     created_at = jmodels.jDateTimeField(auto_now_add=True)
