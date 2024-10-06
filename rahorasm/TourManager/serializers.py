@@ -52,3 +52,24 @@ class PackageSerializer(serializers.ModelSerializer):
         model = Package
         fields = '__all__'
 
+
+
+
+class NavbarCitySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = City
+        fields = '__all__'
+
+class NavbarCountrySerializer(serializers.ModelSerializer):
+    cities = NavbarCitySerializer(many=True)  # Include cities
+
+    class Meta:
+        model = Country
+        fields = '__all__'
+
+class NavbarContinentSerializer(serializers.ModelSerializer):
+    countries = NavbarCountrySerializer(many=True)  # Include countries
+
+    class Meta:
+        model = Continent
+        fields = '__all__'

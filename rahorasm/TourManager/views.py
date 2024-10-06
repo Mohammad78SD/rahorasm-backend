@@ -14,7 +14,10 @@ from .serializers import (
     AirportSerializer,
     PackageSerializer,
     TourSerializer,
-    ContinentSerializer
+    ContinentSerializer,
+    NavbarCitySerializer,
+    NavbarContinentSerializer,
+    NavbarCountrySerializer
 )
 from .filters import (
     CityFilter,
@@ -110,7 +113,7 @@ class NavbarAPIView(APIView):
     def get(self, request):
         # Correctly prefetch related countries and cities
         continents = Continent.objects.prefetch_related('countries__cities').all()
-        continent_data = ContinentSerializer(continents, many=True).data
+        continent_data = NavbarContinentSerializer(continents, many=True).data
         
         visas = Visa.objects.all()
         visa_data = VisaSerializer(visas, many=True).data
