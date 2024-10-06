@@ -150,7 +150,7 @@ class NavbarAPIView(APIView):
             children = {
                 "id": visa['id'],
                 "name": f"ویزای {visa['title']}",
-                "path": f"/visa/visas/?visa={visa['id']}"
+                "path": f"/visa/visas?visa={visa['id']}"
             }
             visa_entry["children"].append(children)
         navbar.append(visa_entry)
