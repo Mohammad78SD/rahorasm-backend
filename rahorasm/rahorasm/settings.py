@@ -159,8 +159,7 @@ CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOW_CREDENTIALS = True
 
 CORS_ALLOWED_ORIGINS = [
-    "http://localhost:3000",  # Adjust this to your frontend's URL
-    "http://5.161.155.143",  # If accessing directly via IP
+    "https://rahorasm-agency.vercel.app",  # Adjust this to your frontend's URL
 ]
 
 
@@ -268,8 +267,11 @@ CKEDITOR_5_FILE_UPLOAD_PERMISSION = "staff"  # Possible values: "staff", "authen
     
     
     
-    
+CSRF_TRUSTED_ORIGINS = [
+    'https://rahorasm-agency.vercel.app',  # Replace with your actual domain
+]
     
 CSRF_COOKIE_NAME = 'csrftoken'  # Default value
 CSRF_COOKIE_HTTPONLY = False  # Ensure this is False to access the cookie via JavaScript
-CSRF_COOKIE_SECURE = False  # Set to True if using HTTPS
+CSRF_COOKIE_SECURE = True  # Set to True if using HTTPS
+SESSION_COOKIE_SECURE = True
