@@ -5,6 +5,8 @@ from rest_framework.response import Response
 from django.db.models import OuterRef, Subquery
 from django_filters.rest_framework import DjangoFilterBackend
 from .models import City, Country, AirLine, Airport, Package, Tour, Continent
+from VisaManager.models import Visa
+from VisaManager.serializers import VisaSerializer
 from .serializers import (
     CitySerializer,
     CountrySerializer,
@@ -110,6 +112,9 @@ class NavbarAPIView(APIView):
         continents = Continent.objects.prefetch_related('countries__cities').all()
         continent_data = ContinentSerializer(continents, many=True).data
         
+        visas = Visa.objects.all()
+        visa_data = VisaSerializer(visas, many=True).data
+        
         navbar = []
         for continent in continent_data:
             continent_entry = {
@@ -133,6 +138,20 @@ class NavbarAPIView(APIView):
                 continent_entry["children"].append(country_entry)
 
             navbar.append(continent_entry)
+            
+        visa_entry={
+            "name": "ویزا",
+            "children": []
+        }
+        for visa in visa_data:
+            children = {
+                "id": visa['id'],
+                "name": f"ویزای {visa['title']}",
+                "path": f"?visa={visa['id']}"
+            }
+            visa_entry["children"].append(children)
+        navbar.append(visa_entry)
+            
         blog = {
             "id": "200",
             "name": "وبلاگ",

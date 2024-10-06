@@ -8,6 +8,8 @@ import random
 from .utils import send_otp
 from .models import UserModel as User, ContactForm
 from rest_framework.permissions import IsAuthenticated
+from django.contrib.auth.hashers import check_password
+
 
 class LoginView(APIView):      
     def post(self, request):
@@ -15,14 +17,19 @@ class LoginView(APIView):
         if serializer.is_valid():
             phone_number = serializer.validated_data['phone_number']
             password = serializer.validated_data['password']
-            user = authenticate(request, phone_number=phone_number, password=password)
-            if user is not None:
+            try:
+                user = User.objects.get(phone_number=phone_number)
+            except User.DoesNotExist:
+                return Response({"message": "کاربری با این شماره تلفن یافت نشد."}, status=status.HTTP_400_BAD_REQUEST)
+            if check_password(password, user.password):
                 if user.is_active:
                     login(request, user)
                     return Response({"message": "با موفقیت وارد شدید"}, status=status.HTTP_200_OK)
                 else:
                     return Response({"message": "حساب کاربری شما فعال نیست"}, status=status.HTTP_403_FORBIDDEN)
-            return Response({"message": "شماره تلفن و یا گذرواژه اشتباه است"}, status=status.HTTP_400_BAD_REQUEST)
+            else:
+                return Response({"message": "شماره تلفن و یا گذرواژه اشتباه است"}, status=status.HTTP_400_BAD_REQUEST)
+
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class LoginRequestOTPView(APIView):
@@ -65,11 +72,13 @@ class LoginValidateOTPView(APIView):
             stored_otp = cache.get(f"otp_{phone_number}")
             
             if stored_otp and stored_otp == otp:
-                cache.delete(f"otp_{phone_number}")
-                user = User.objects.get(phone_number=phone_number)
-                login(request, user)
-                return Response({"message": "OTP validated successfully"}, status=status.HTTP_200_OK)
-            return Response({"error": "Invalid OTP"}, status=status.HTTP_400_BAD_REQUEST)
+                user = User.objects.filter(phone_number=phone_number).first()
+                if(user):
+                    login(request, user)
+                    cache.delete(f"otp_{phone_number}")
+                    return Response({"message": "با موفقیت وارد شدید"}, status=status.HTTP_200_OK)
+                return Response({"error": "کاربری با این شماره تلفن وجود ندارد."}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"error": "کد یکبار مصرف را اشتباه وارد کردید."}, status=status.HTTP_400_BAD_REQUEST)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class SignupRequestView(APIView):

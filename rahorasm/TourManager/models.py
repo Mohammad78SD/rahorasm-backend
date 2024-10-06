@@ -76,6 +76,7 @@ class Tour(models.Model):
     package = models.ForeignKey(Package, on_delete=models.PROTECT, related_name='tours')
     description = models.TextField()
     tour_type = models.CharField(max_length=200, choices=[('هوایی', 'هوایی'), ('زمینی', 'زمینی')])
+    is_featured = models.BooleanField(default=False)
     tour_duration = models.CharField(max_length=200, default='7 روز')
     needed_documents = models.TextField()
     agency_service = models.TextField()
