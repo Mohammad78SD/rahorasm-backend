@@ -143,6 +143,7 @@ class NavbarAPIView(APIView):
             navbar.append(continent_entry)
             
         visa_entry={
+            "id": 3,
             "name": "ویزا",
             "children": []
         }
@@ -150,23 +151,23 @@ class NavbarAPIView(APIView):
             children = {
                 "id": visa['id'],
                 "name": f"ویزای {visa['title']}",
-                "path": f"/visa/visas?visa={visa['id']}"
+                "path": f"/visa/visas/?visa={visa['id']}"
             }
             visa_entry["children"].append(children)
         navbar.append(visa_entry)
             
         blog = {
-            "id": "200",
+            "id": 4,
             "name": "وبلاگ",
             "path": "/blog"
         }
         about = {
-            "id": "300",
+            "id": 5,
             "name": "درباره ما",
             "path": "/about-us"
         }
         contact = {
-            "id": "400",
+            "id": 6,
             "name": "تماس با ما",
             "path": "/contact-us"
         }
