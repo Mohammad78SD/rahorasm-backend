@@ -123,7 +123,7 @@ class NavbarAPIView(APIView):
             continent_entry = {
                 "id": continent['id'],
                 "name": f"تور {continent['name']}",
-                "path": f"/tours/?continentid={continent['id']}"
+                "path": f"/tours/?continentid={continent['id']}",
                 "children": []
             }
             for country in continent.get('countries', []):
