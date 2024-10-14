@@ -123,21 +123,21 @@ class NavbarAPIView(APIView):
             continent_entry = {
                 "id": continent['id'],
                 "name": f"تور {continent['name']}",
-                "path": f"/tour/?continentid={continent['id']}",
+                "path": f"/tour/{continent['id']}",
                 "children": []
             }
             for country in continent.get('countries', []):
                 country_entry = {
                     "id": country['id'],
                     "name": country['name'],
-                    "path": f"/tour/?continentid={continent['id']}/?countryid={country['id']}",
+                    "path": f"/tour/{continent['id']}/{country['id']}",
                     "children": []
                 }
                 for city in country.get('cities', []):
                     city_entry = {
                         "id": city['id'],
                         "name": city['name'],
-                        "path": f"/tour/?continentid={continent['id']}/?countryid={country['id']}/?cityid={city['id']}"
+                        "path": f"/tour/{continent['id']}/{country['id']}/{city['id']}"
                     }
                     country_entry["children"].append(city_entry)
 
