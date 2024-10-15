@@ -8,3 +8,4 @@ migrations
 .vscode
 media/
 static/
+.venv
