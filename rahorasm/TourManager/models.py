@@ -66,6 +66,10 @@ class Airport(models.Model):
 class Package(models.Model):
     title = models.CharField(max_length=200)
     city = models.ForeignKey(City, on_delete=models.PROTECT)
+    rahvarasm = models.CharField(max_length=255,verbose_name="صفر با راه و رسم")
+    besttime = models.CharField(max_length=255,verbose_name="بهترین زمان سفر")
+    porsCons= models.CharField(max_length=255,verbose_name="مزایا و معایب ")
+    atrraction = models.CharField(max_length=255,verbose_name="جاذبه")
     created_at = jmodels.jDateTimeField(auto_now_add=True)
     edited_at = jmodels.jDateTimeField(auto_now=True)
     def __str__(self):

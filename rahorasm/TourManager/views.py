@@ -63,15 +63,12 @@ class PackageListView(generics.ListAPIView):
         continent_id = self.request.query_params.get('continent', None)
         countery_id = self.request.query_params.get('countery', None)
         city_id = self.request.query_params.get('city', None)
-        if countery_id:
-            queryset.filter(tours__city__counteris__id=countery_id)
-
         if continent_id:
-            queryset.filter(tours__city__counnteris__continents__id=continent_id)
+            queryset.filter(city__counnteris__continents__id=continent_id)
         if countery_id:
-            queryset.filter(tours__city__countery__id=countery_id)
+            queryset.filter(city__countery__id=countery_id)
         if city_id:
-            queryset.filter(tour_city__id=city_id)
+            queryset.filter(city__id=city_id)
 
         return queryset
 
@@ -92,9 +89,9 @@ class TourListView(generics.ListAPIView):
         continent_id = self.request.query_params.get('continent', None)
         countery_id = self.request.query_params.get('countery', None)
         city_id = self.request.query_params.get('city', None)
+        print(city_id,countery_id,continent_id)
         if countery_id:
             queryset.filter(tours__city__counteris__id=countery_id)
-
         if continent_id:
             queryset.filter(tours__city__counnteris__continents__id=continent_id)
         if countery_id:
