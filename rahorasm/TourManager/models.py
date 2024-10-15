@@ -9,6 +9,11 @@ class Continent(models.Model):
     description = models.TextField(null=True, blank=True)
     created_at = jmodels.jDateTimeField(auto_now_add=True)
     edited_at = jmodels.jDateTimeField(auto_now=True)
+    land =CKEditor5Field(verbose_name="سفر با راه و رسم",null=True,blank=True)
+    ProsCons = CKEditor5Field(verbose_name="مزایا و  معایب",null=True,blank=True)
+    attraction =CKEditor5Field(verbose_name="جاذبه های تورسیتی",null=True,blank=True)
+    Bestime = CKEditor5Field(verbose_name="بهترین زمان",null=True,blank=True) 
+
     def __str__(self):
         return self.name
     class Meta:
@@ -17,7 +22,11 @@ class Continent(models.Model):
         
 class Country(models.Model):
     name = models.CharField(max_length=200)
-    continent = models.ForeignKey(Continent, on_delete=models.PROTECT, related_name='continents')
+    continent = models.ForeignKey(Continent, on_delete=models.PROTECT, related_name='countries')
+    land =CKEditor5Field(verbose_name="سفر با راه و رسم",null=True,blank=True)
+    ProsCons = CKEditor5Field(verbose_name="مزایا و  معایب",null=True,blank=True)
+    attraction =CKEditor5Field(verbose_name="جاذبه های تورسیتی",null=True,blank=True)
+    Bestime = CKEditor5Field(verbose_name="بهترین زمان",null=True,blank=True) 
     description = models.TextField(null=True, blank=True)
     created_at = jmodels.jDateTimeField(auto_now_add=True)
     edited_at = jmodels.jDateTimeField(auto_now=True)
@@ -29,16 +38,19 @@ class Country(models.Model):
         
 class City(models.Model):
     name = models.CharField(max_length=200)
-    country = models.ForeignKey(Country, on_delete=models.PROTECT, related_name='counteris')
+    country = models.ForeignKey(Country, on_delete=models.PROTECT, related_name='cities')
     description = models.TextField(null=True, blank=True)
     created_at = jmodels.jDateTimeField(auto_now_add=True)
     edited_at = jmodels.jDateTimeField(auto_now=True)
+    land =CKEditor5Field(verbose_name="سفر با راه و رسم",null=True,blank=True)
+    ProsCons = CKEditor5Field(verbose_name="مزایا و  معایب",null=True,blank=True)
+    attraction =CKEditor5Field(verbose_name="جاذبه های تورسیتی",null=True,blank=True)
+    Bestime = CKEditor5Field(verbose_name="بهترین زمان",null=True,blank=True) 
     def __str__(self):
         return self.name
     class Meta:
         verbose_name = "شهر"
         verbose_name_plural = "شهر ها"
-    
 
 class AirLine(models.Model):
     name = models.CharField(max_length=200)
@@ -64,29 +76,9 @@ class Airport(models.Model):
         verbose_name = "فرودگاه"
         verbose_name_plural = "فرودگاه ها"
 
-class Package(models.Model):
-    #TourDetail 
-    title = models.CharField(max_length=200)
-    city = models.ForeignKey(City, on_delete=models.PROTECT)
-    rahvarasm = models.CharField(max_length=255,verbose_name="صفر با راه و رسم")
-    besttime = models.CharField(max_length=255,verbose_name="بهترین زمان سفر")
-    porsCons= models.CharField(max_length=255,verbose_name="مزایا و معایب ")
-    atrraction = models.CharField(max_length=255,verbose_name="جاذبه")
-    created_at = jmodels.jDateTimeField(auto_now_add=True)
-    edited_at = jmodels.jDateTimeField(auto_now=True)
-    land =CKEditor5Field(verbose_name="سفر با راه و رسم",null=True,blank=True)
-    ProsCons = CKEditor5Field(verbose_name="مزایا و  معایب",null=True,blank=True)
-    attraction =CKEditor5Field(verbose_name="جاذبه های تورسیتی",null=True,blank=True)
-    Bestime = CKEditor5Field(verbose_name="بهترین زمان",null=True,blank=True) 
-    def __str__(self):
-        return self.title
-    class Meta:
-        verbose_name = "پکیج"
-        verbose_name_plural = "پکیج ها"
-    
 class Tour(models.Model):
     title = models.CharField(max_length=200)
-    package = models.ForeignKey(Package, on_delete=models.PROTECT, related_name='tours')
+    city=models.ForeignKey(City,on_delete=models.PROTECT)
     description = models.TextField()
     tour_type = models.CharField(max_length=200, choices=[('هوایی', 'هوایی'), ('زمینی', 'زمینی')])
     is_featured = models.BooleanField(default=False)
