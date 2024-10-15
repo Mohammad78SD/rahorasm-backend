@@ -60,28 +60,18 @@ class PackageListView(generics.ListAPIView):
 
     def get_queryset(self):
         queryset = Package.objects.all().prefetch_related('tours')
+        continent_id = self.request.query_params.get('continent', None)
+        countery_id = self.request.query_params.get('countery', None)
+        city_id = self.request.query_params.get('city', None)
+        if countery_id:
+            queryset.filter(tours__city__counteris__id=countery_id)
 
-        # Get filter parameters from the request
-        tour_price_gte = self.request.query_params.get('tour_price__gte')
-        tour_price_lte = self.request.query_params.get('tour_price__lte')
-        tour_type = self.request.query_params.get('tour_type')  # Example filter for tour type
-
-        # Filter based on tour prices
-        if tour_price_gte or tour_price_lte:
-            tour_queryset = Tour.objects.filter(package=OuterRef('pk'))
-            if tour_price_gte:
-                queryset = queryset.annotate(min_price=Subquery(tour_queryset.values('price').filter(price__gte=tour_price_gte).order_by('price')[:1]))
-            if tour_price_lte:
-                queryset = queryset.annotate(max_price=Subquery(tour_queryset.values('price').filter(price__lte=tour_price_lte).order_by('-price')[:1]))
-
-            if tour_price_gte:
-                queryset = queryset.filter(min_price__isnull=False)
-            if tour_price_lte:
-                queryset = queryset.filter(max_price__isnull=False)
-
-        # Filter based on tour type if provided
-        if tour_type:
-            queryset = queryset.filter(tours__tour_type=tour_type).distinct()
+        if continent_id:
+            queryset.filter(tours__city__counnteris__continents__id=continent_id)
+        if countery_id:
+            queryset.filter(tours__city__countery__id=countery_id)
+        if city_id:
+            queryset.filter(tour_city__id=city_id)
 
         return queryset
 
@@ -98,10 +88,19 @@ class PackageListView(generics.ListAPIView):
 class TourListView(generics.ListAPIView):
     serializer_class = TourSerializer
     def get_queryset(self):
-        continent_name = self.request.query_params.get('continent', None)
         queryset = Tour.objects.all()
-        if continent_name:
-            queryset = queryset.filter(destination_airport__city__country__continent__name=continent_name)
+        continent_id = self.request.query_params.get('continent', None)
+        countery_id = self.request.query_params.get('countery', None)
+        city_id = self.request.query_params.get('city', None)
+        if countery_id:
+            queryset.filter(tours__city__counteris__id=countery_id)
+
+        if continent_id:
+            queryset.filter(tours__city__counnteris__continents__id=continent_id)
+        if countery_id:
+            queryset.filter(tours__city__countery__id=countery_id)
+        if city_id:
+            queryset.filter(tour_city__id=city_id)
         return queryset
     
 class TourDetailView(generics.RetrieveAPIView):
@@ -123,21 +122,21 @@ class NavbarAPIView(APIView):
             continent_entry = {
                 "id": continent['id'],
                 "name": f"تور {continent['name']}",
-                "path": f"/tour/{continent['id']}",
+                "path": f"/tour/?continent_id={continent['id']}",
                 "children": []
             }
             for country in continent.get('countries', []):
                 country_entry = {
                     "id": country['id'],
                     "name": country['name'],
-                    "path": f"/tour/{continent['id']}/{country['id']}",
+                    "path": f"/tour/?country_id={country['id']}",
                     "children": []
                 }
                 for city in country.get('cities', []):
                     city_entry = {
                         "id": city['id'],
                         "name": city['name'],
-                        "path": f"/tour/{continent['id']}/{country['id']}/{city['id']}"
+                        "path": f"/tour/?city_id={city['id']}"
                     }
                     country_entry["children"].append(city_entry)
 

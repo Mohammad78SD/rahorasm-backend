@@ -1,5 +1,7 @@
 from django.db import models
 from django_jalali.db import models as jmodels
+from django_resized import ResizedImageField
+
 
 class Continent(models.Model):
     name = models.CharField(max_length=200)
@@ -14,7 +16,7 @@ class Continent(models.Model):
         
 class Country(models.Model):
     name = models.CharField(max_length=200)
-    continent = models.ForeignKey(Continent, on_delete=models.PROTECT, related_name='countries')
+    continent = models.ForeignKey(Continent, on_delete=models.PROTECT, related_name='continents')
     description = models.TextField(null=True, blank=True)
     created_at = jmodels.jDateTimeField(auto_now_add=True)
     edited_at = jmodels.jDateTimeField(auto_now=True)
@@ -26,7 +28,7 @@ class Country(models.Model):
         
 class City(models.Model):
     name = models.CharField(max_length=200)
-    country = models.ForeignKey(Country, on_delete=models.PROTECT, related_name='cities')
+    country = models.ForeignKey(Country, on_delete=models.PROTECT, related_name='counteris')
     description = models.TextField(null=True, blank=True)
     created_at = jmodels.jDateTimeField(auto_now_add=True)
     edited_at = jmodels.jDateTimeField(auto_now=True)
@@ -40,6 +42,7 @@ class City(models.Model):
 class AirLine(models.Model):
     name = models.CharField(max_length=200)
     description = models.TextField(null=True, blank=True)
+    logo = ResizedImageField(upload_to="./logo",size=[40,40],null=True)
     created_at = jmodels.jDateTimeField(auto_now_add=True)
     edited_at = jmodels.jDateTimeField(auto_now=True)
     def __str__(self):
