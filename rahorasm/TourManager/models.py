@@ -1,5 +1,6 @@
 from django.db import models
 from django_jalali.db import models as jmodels
+from django_ckeditor_5.fields import CKEditor5Field
 
 class Continent(models.Model):
     name = models.CharField(max_length=200)
@@ -40,6 +41,7 @@ class City(models.Model):
 class AirLine(models.Model):
     name = models.CharField(max_length=200)
     description = models.TextField(null=True, blank=True)
+    image = models.ImageField(verbose_name="logo",null=True,blank=True)
     created_at = jmodels.jDateTimeField(auto_now_add=True)
     edited_at = jmodels.jDateTimeField(auto_now=True)
     def __str__(self):
@@ -59,12 +61,17 @@ class Airport(models.Model):
     class Meta:
         verbose_name = "فرودگاه"
         verbose_name_plural = "فرودگاه ها"
-    
+
 class Package(models.Model):
+    #TourDetail 
     title = models.CharField(max_length=200)
     city = models.ForeignKey(City, on_delete=models.PROTECT)
     created_at = jmodels.jDateTimeField(auto_now_add=True)
     edited_at = jmodels.jDateTimeField(auto_now=True)
+    land =CKEditor5Field(verbose_name="سفر با راه و رسم",null=True,blank=True)
+    ProsCons = CKEditor5Field(verbose_name="مزایا و  معایب",null=True,blank=True)
+    attraction =CKEditor5Field(verbose_name="جاذبه های تورسیتی",null=True,blank=True)
+    Bestime = CKEditor5Field(verbose_name="بهترین زمان",null=True,blank=True) 
     def __str__(self):
         return self.title
     class Meta:
