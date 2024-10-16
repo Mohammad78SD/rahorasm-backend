@@ -32,7 +32,6 @@ class AirportSerializer(serializers.ModelSerializer):
         model = Airport
         fields = '__all__'
 
-
 class TourSerializer(serializers.ModelSerializer):
     airline = AirLineSerializer()
     origin_airport = AirportSerializer()
@@ -41,8 +40,6 @@ class TourSerializer(serializers.ModelSerializer):
     class Meta:
         model = Tour
         fields = '__all__'
-
-
 
 class PackageSerializer(serializers.ModelSerializer):
     tours = TourSerializer(many=True, read_only=True)

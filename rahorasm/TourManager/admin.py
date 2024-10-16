@@ -1,5 +1,6 @@
 from django.contrib import admin
-from .models import City, Country, AirLine, Airport, Package, Tour, Continent
+from django.http import HttpRequest
+from .models import City, Country, AirLine, Airport, Package, Tour, Continent,EuPackage,AsiaPackage
 from durationwidget.widgets import TimeDurationWidget
 from django import forms
 from datetime import timedelta
@@ -59,5 +60,4 @@ class PackageAdmin(admin.ModelAdmin):
 
 @admin.register(Tour)
 class TourAdmin(admin.ModelAdmin):
-    pass
-                
+    pass 

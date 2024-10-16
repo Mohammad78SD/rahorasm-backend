@@ -29,7 +29,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = env("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG =os.environ.get("DEBUG",False)
 
 ALLOWED_HOSTS = ['*']
 
@@ -68,6 +68,7 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = 'rahorasm.urls'
 
+
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
@@ -89,17 +90,25 @@ WSGI_APPLICATION = 'rahorasm.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
-
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': env("DB_NAME"),
-        'USER': env("DB_USER"),
-        'PASSWORD': env("DB_PASSWORD"),
-        'HOST': env("DB_HOST"),
-        'PORT': env("DB_PORT"),
+if DEBUG:
+    DATABASES ={
+        "default":{
+            "ENGINE":"django.db.backends.sqlite3",
+            "NAME":"db.sqlite3",
+        }
     }
-}
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql_psycopg2',
+            'NAME': env("DB_NAME"),
+            'USER': env("DB_USER"),
+            'PASSWORD': env("DB_PASSWORD"),
+            'HOST': env("DB_HOST"),
+            'PORT': env("DB_PORT"),
+        }
+    }
+
 
 
 # Password validation
@@ -148,7 +157,12 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
 STATIC_URL = '/static/'
-STATIC_ROOT = os.path.join(BASE_DIR, 'static')  # Adjust the path as needed
+if DEBUG:
+    STATICFILES_DIRS = [
+        os.path.join(BASE_DIR, "static"), # your static/ files folder
+    ]
+else:
+    STATIC_ROOT = os.path.join(BASE_DIR, 'static')  # Adjust the path as needed
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
@@ -199,7 +213,7 @@ customColorPalette = [
         },
     ]
 
-# CKEDITOR_5_CUSTOM_CSS = 'path_to.css' # optional
+CKEDITOR_5_CUSTOM_CSS = 'admin_dark_mode.css' # optional
 # CKEDITOR_5_FILE_STORAGE = "path_to_storage.CustomStorage" # optional
 CKEDITOR_5_CONFIGS = {
     'default': {

@@ -3,7 +3,10 @@ __pycache__
 db.sqlite3
 /env
 *.env
+.venv
+migrations
 .vscode
 media/
 static/
 .venv
+migrations/*
