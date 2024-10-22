@@ -34,13 +34,6 @@ class UserManager(BaseUserManager):
         return user
 
 
-class OTP(models.Model):
-    phone_number = models.CharField(unique=True, max_length=15, null=False, blank=False, validators=[phone_regex])
-    otp = models.IntegerField()
-    otp_expiry = models.DateTimeField()
-    max_otp_try = models.IntegerField(default=settings.MAX_OTP_TRY)
-    otp_max_out = models.DateTimeField(null=True, blank=True)
-
 
 
 class UserModel(AbstractBaseUser, PermissionsMixin):
@@ -61,29 +54,14 @@ class UserModel(AbstractBaseUser, PermissionsMixin):
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    last_login = models.DateTimeField(auto_now=True)
 
-  
     USERNAME_FIELD = 'phone_number'
-    REQUIRED_FIELDS = []
 
     objects = UserManager()
 
     def __str__(self):
-        return self.phone_number
+        return self.name
 
-    def get_full_name(self):
-        return self.fname + " " + self.lname
-
-    def get_short_name(self):
-        return self.phone_number
-
-    def has_perm(self, perm, obj=None):
-        return True
-
-    def has_module_perms(self, app_label):
-
-        return True
     
     class Meta:
         verbose_name = "کاربر"
