@@ -9,6 +9,7 @@ from .utils import send_otp
 from .models import UserModel as User, ContactForm
 from rest_framework.permissions import IsAuthenticated
 from django.contrib.auth.hashers import check_password
+from rest_framework_simplejwt.tokens import RefreshToken
 
 
 class LoginView(APIView):      
@@ -17,14 +18,15 @@ class LoginView(APIView):
         if serializer.is_valid():
             phone_number = serializer.validated_data['phone_number']
             password = serializer.validated_data['password']
-            try:
-                user = User.objects.get(phone_number=phone_number)
-            except User.DoesNotExist:
-                return Response({"message": "کاربری با این شماره تلفن یافت نشد."}, status=status.HTTP_400_BAD_REQUEST)
-            if check_password(password, user.password):
+            user = authenticate(request, phone_number=phone_number, password=password)
+            if user:
                 if user.is_active:
-                    login(request, user)
-                    return Response({"message": "با موفقیت وارد شدید"}, status=status.HTTP_200_OK)
+                    refresh = RefreshToken.for_user(user)
+                    return Response({
+                        'refresh': str(refresh),
+                        'access': str(refresh.access_token),
+                        "message": "با موفقیت وارد شدید."
+                    }, status=status.HTTP_200_OK)
                 else:
                     return Response({"message": "حساب کاربری شما فعال نیست"}, status=status.HTTP_403_FORBIDDEN)
             else:
@@ -73,10 +75,19 @@ class LoginValidateOTPView(APIView):
             
             if stored_otp and stored_otp == otp:
                 user = User.objects.filter(phone_number=phone_number).first()
-                if(user):
-                    login(request, user)
+                if user:
+                    # Generate JWT tokens
+                    refresh = RefreshToken.for_user(user)
+                    
+                    # Clear the OTP from cache
                     cache.delete(f"otp_{phone_number}")
-                    return Response({"message": "با موفقیت وارد شدید"}, status=status.HTTP_200_OK)
+                    
+                    return Response({
+                        'refresh': str(refresh),
+                        'access': str(refresh.access_token),
+                        "message": "با موفقیت وارد شدید"
+                    }, status=status.HTTP_200_OK)
+                    
                 return Response({"error": "کاربری با این شماره تلفن وجود ندارد."}, status=status.HTTP_400_BAD_REQUEST)
             return Response({"error": "کد یکبار مصرف را اشتباه وارد کردید."}, status=status.HTTP_400_BAD_REQUEST)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -126,22 +137,30 @@ class SignupValidateOTPView(APIView):
                 user.name = user_data['name']
                 user.save()
                 
+                # Generate JWT tokens
+                refresh = RefreshToken.for_user(user)
+                
+                # Clear the OTP and signup data from cache
                 cache.delete(f"otp_{phone_number}")
                 cache.delete(f"signup_{phone_number}")
-                login(request, user)
                 
-                return Response({"message": "کاربر با موفقیت ایجاد شد"}, status=status.HTTP_201_CREATED)
+                return Response({
+                    'refresh': str(refresh),
+                    'access': str(refresh.access_token),
+                    "message": "کاربر با موفقیت ایجاد شد"
+                }, status=status.HTTP_201_CREATED)
+                
             return Response({"message": "کد را به درستی وارد نکرده اید."}, status=status.HTTP_400_BAD_REQUEST)
         return Response({"message": "اطلاعات به درستی ارسال نشده است"}, status=status.HTTP_400_BAD_REQUEST)
+
     
 class UserSessionView(APIView):
 
+    permission_classes = [IsAuthenticated]
+
     def get(self, request):
         user = request.user
-        if user.is_anonymous:
-            session_data = None
-            return Response({'payload': session_data})
-        else:
+        if user.is_authenticated:
             session_data = {
                 'id': user.id,
                 'name': user.name,
@@ -150,15 +169,18 @@ class UserSessionView(APIView):
                 'is_staff': user.is_staff,
             }
             return Response({"payload": session_data}, status=status.HTTP_200_OK)
+        else:
+            return Response({"message": "User is not authenticated"}, status=status.HTTP_401_UNAUTHORIZED)
+
         
         
 class ContactUsView(generics.CreateAPIView):
     queryset = ContactForm.objects.all()
     serializer_class = ContactUsSerializer
     
-    
-class LogoutView(APIView):
-    permission_classes = [IsAuthenticated]
-    def post(self, request):
-        request.session.flush()
-        return Response({"message": "با موفقیت خارج شدید"}, status=status.HTTP_200_OK)
+# commented cause using jwt    
+# class LogoutView(APIView):
+#     permission_classes = [IsAuthenticated]
+#     def post(self, request):
+#         request.session.flush()
+#         return Response({"message": "با موفقیت خارج شدید"}, status=status.HTTP_200_OK)
