@@ -1,7 +1,6 @@
 from django.contrib import admin
 
-from .models import UserModel, OTP, ContactForm
+from .models import UserModel, ContactForm
 
 admin.site.register(UserModel)
-admin.site.register(OTP)
 admin.site.register(ContactForm)
