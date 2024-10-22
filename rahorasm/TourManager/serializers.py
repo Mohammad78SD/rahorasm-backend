@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import City, Country, AirLine, Airport, Package, Tour, Continent
+from .models import City, Country, AirLine, Airport, Tour, Continent, Flight
 
 
 class AirLineSerializer(serializers.ModelSerializer):
@@ -32,25 +32,22 @@ class AirportSerializer(serializers.ModelSerializer):
         model = Airport
         fields = '__all__'
 
+class FlightSerializer(serializers.ModelSerializer):
+    origin_airport = AirportSerializer()
+    destination_airport = AirportSerializer()
+    return_origin_airport = AirportSerializer()
+    return_destination_airport = AirportSerializer()
+    class Meta:
+        model = Flight
+        fields = '__all__'
 
 class TourSerializer(serializers.ModelSerializer):
     airline = AirLineSerializer()
-    origin_airport = AirportSerializer()
-    destination_airport = AirportSerializer()
-
+    flights = FlightSerializer(many=True, read_only=True)
     class Meta:
         model = Tour
         fields = '__all__'
 
-
-
-class PackageSerializer(serializers.ModelSerializer):
-    tours = TourSerializer(many=True, read_only=True)
-    city = CitySerializer()
-
-    class Meta:
-        model = Package
-        fields = '__all__'
 
 
 
