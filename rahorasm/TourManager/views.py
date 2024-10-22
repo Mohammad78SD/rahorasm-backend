@@ -2,9 +2,8 @@ from rest_framework import generics
 from rest_framework.views import APIView
 from rest_framework.response import Response
 
-from django.db.models import OuterRef, Subquery
 from django_filters.rest_framework import DjangoFilterBackend
-from .models import City, Country, AirLine, Airport, Package, Tour, Continent
+from .models import City, Country, AirLine, Airport, Tour, Continent
 from VisaManager.models import Visa
 from VisaManager.serializers import VisaSerializer
 from .serializers import (
@@ -12,7 +11,6 @@ from .serializers import (
     CountrySerializer,
     AirLineSerializer,
     AirportSerializer,
-    PackageSerializer,
     TourSerializer,
     ContinentSerializer,
     NavbarCitySerializer,
@@ -24,7 +22,6 @@ from .filters import (
     CountryFilter,
     AirLineFilter,
     AirportFilter,
-    PackageFilter,
     TourFilter,
 )
 from rest_framework.filters import OrderingFilter
@@ -53,55 +50,30 @@ class AirportListView(generics.ListAPIView):
     filter_backends = (DjangoFilterBackend,)
     filterset_class = AirportFilter
 
-    
-class PackageListView(generics.ListAPIView):
-    serializer_class = PackageSerializer
-    filter_backends = (DjangoFilterBackend, OrderingFilter)
-
-    def get_queryset(self):
-        queryset = Package.objects.all().prefetch_related('tours')
-
-        # Get filter parameters from the request
-        tour_price_gte = self.request.query_params.get('tour_price__gte')
-        tour_price_lte = self.request.query_params.get('tour_price__lte')
-        tour_type = self.request.query_params.get('tour_type')  # Example filter for tour type
-
-        # Filter based on tour prices
-        if tour_price_gte or tour_price_lte:
-            tour_queryset = Tour.objects.filter(package=OuterRef('pk'))
-            if tour_price_gte:
-                queryset = queryset.annotate(min_price=Subquery(tour_queryset.values('price').filter(price__gte=tour_price_gte).order_by('price')[:1]))
-            if tour_price_lte:
-                queryset = queryset.annotate(max_price=Subquery(tour_queryset.values('price').filter(price__lte=tour_price_lte).order_by('-price')[:1]))
-
-            if tour_price_gte:
-                queryset = queryset.filter(min_price__isnull=False)
-            if tour_price_lte:
-                queryset = queryset.filter(max_price__isnull=False)
-
-        # Filter based on tour type if provided
-        if tour_type:
-            queryset = queryset.filter(tours__tour_type=tour_type).distinct()
-
-        return queryset
-
-    filterset_fields = {
-        'city': ['exact'],
-        # 'country': ['exact'],
-        'created_at': ['gte', 'lte'],
-        # Add more filters as needed
-    }
-
-    ordering_fields = ['created_at', 'tours__price', 'tours__start_date']  # Allow ordering by tour fields
-    ordering = ['created_at']  # Default ordering
 
 class TourListView(generics.ListAPIView):
+    queryset = Tour.objects.all()
     serializer_class = TourSerializer
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = {
+        'destination__name': ['exact'],
+        'destination__country__name': ['exact'],
+        'destination__country__continent__name': ['exact'],
+    }
+
     def get_queryset(self):
+        queryset = super().get_queryset()
+        city_name = self.request.query_params.get('city', None)
+        country_name = self.request.query_params.get('country', None)
         continent_name = self.request.query_params.get('continent', None)
-        queryset = Tour.objects.all()
+
+        if city_name:
+            queryset = queryset.filter(destination__name=city_name)
+        if country_name:
+            queryset = queryset.filter(destination__country__name=country_name)
         if continent_name:
-            queryset = queryset.filter(destination_airport__city__country__continent__name=continent_name)
+            queryset = queryset.filter(destination__country__continent__name=continent_name)
+
         return queryset
     
 class TourDetailView(generics.RetrieveAPIView):
@@ -123,21 +95,21 @@ class NavbarAPIView(APIView):
             continent_entry = {
                 "id": continent['id'],
                 "name": f"تور {continent['name']}",
-                "path": f"/tour/{continent['id']}",
+                "path": f"/tour/tours/?continent{continent['name']}",
                 "children": []
             }
             for country in continent.get('countries', []):
                 country_entry = {
                     "id": country['id'],
                     "name": country['name'],
-                    "path": f"/tour/{continent['id']}/{country['id']}",
+                    "path": f"/tour/tours/?country{continent['name']}",
                     "children": []
                 }
                 for city in country.get('cities', []):
                     city_entry = {
                         "id": city['id'],
                         "name": city['name'],
-                        "path": f"/tour/{continent['id']}/{country['id']}/{city['id']}"
+                        "path": f"/tour/tours/?city{continent['name']}"
                     }
                     country_entry["children"].append(city_entry)
 
