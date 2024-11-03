@@ -36,6 +36,7 @@ class City(models.Model):
 
 class AirLine(models.Model):
     name = models.CharField(max_length=200)
+    logo = models.ImageField(upload_to='airline_logos/', null=True, blank=True)
     created_at = jmodels.jDateTimeField(auto_now_add=True)
     edited_at = jmodels.jDateTimeField(auto_now=True)
     def __str__(self):
@@ -56,9 +57,14 @@ class Airport(models.Model):
         verbose_name = "فرودگاه"
         verbose_name_plural = "فرودگاه ها"
     
+
+    def save(self, *args, **kwargs):
+        self.short_name = self.short_name.upper()
+        super().save(*args, **kwargs)
     
 class Flight(models.Model):
     tour = models.ForeignKey('Tour', on_delete=models.CASCADE, related_name='flights')
+    airline = models.ForeignKey(AirLine, on_delete=models.PROTECT)
     departure = jmodels.jDateTimeField()
     arrival = jmodels.jDateTimeField()
     origin_airport = models.ForeignKey(Airport, on_delete=models.PROTECT, related_name='origin_airport')
@@ -87,7 +93,6 @@ class Tour(models.Model):
     needed_documents = models.TextField()
     agency_service = models.TextField()
     tour_guide = models.TextField()
-    airline = models.ForeignKey(AirLine, on_delete=models.PROTECT)
     tour_duration = models.CharField(max_length=200, default='7 روز')
     is_featured = models.BooleanField(default=False)
     least_price = models.DecimalField(max_digits=20, decimal_places=2, null=True, blank=True)
