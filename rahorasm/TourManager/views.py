@@ -1,9 +1,9 @@
 from rest_framework import generics
 from rest_framework.views import APIView
 from rest_framework.response import Response
-
+import jdatetime
 from django_filters.rest_framework import DjangoFilterBackend
-from .models import City, Country, AirLine, Airport, Tour, Continent
+from .models import City, Country, AirLine, Airport, Tour, Continent, Flight
 from VisaManager.models import Visa
 from VisaManager.serializers import VisaSerializer
 from .serializers import (
@@ -12,8 +12,7 @@ from .serializers import (
     AirLineSerializer,
     AirportSerializer,
     TourSerializer,
-    ContinentSerializer,
-    NavbarCitySerializer,
+    FlightSerializer,
     NavbarContinentSerializer,
     NavbarCountrySerializer
 )
@@ -80,13 +79,16 @@ class TourDetailView(generics.RetrieveAPIView):
     queryset = Tour.objects.all()
     serializer_class = TourSerializer
     
+class FlightDetailView(generics.RetrieveAPIView):
+    queryset = Flight.objects.all()
+    serializer_class = FlightSerializer
     
 class NavbarAPIView(APIView):
     def get(self, request):
         # Correctly prefetch related countries and cities
         continents = Continent.objects.prefetch_related('countries__cities').all()
         continent_data = NavbarContinentSerializer(continents, many=True).data
-        
+
         visas = Visa.objects.all()
         visa_data = VisaSerializer(visas, many=True).data
         
