@@ -13,15 +13,15 @@ class FlightInline(admin.TabularInline):
     
 @admin.register(Tour)
 class TourAdmin(admin.ModelAdmin):
-    list_display = ('title', 'tour_type', 'airline', 'is_featured', 'created_at')
+    list_display = ('title', 'tour_type', 'is_featured', 'created_at')
     search_fields = ('title', 'description')
-    list_filter = ('tour_type', 'is_featured', 'airline')
+    list_filter = ('tour_type', 'is_featured')
     ordering = ('-created_at',)
     inlines = [FlightInline]
 
 @admin.register(Flight)
 class FlightAdmin(admin.ModelAdmin):
-    list_display = ('tour', 'departure', 'arrival', 'origin_airport', 'destination_airport', 'start_price')
+    list_display = ('tour', 'airline', 'departure', 'arrival', 'origin_airport', 'destination_airport', 'start_price')
     search_fields = ('tour__title', 'origin_airport__name', 'destination_airport__name')
     list_filter = ('tour', 'origin_airport', 'destination_airport')
     ordering = ('-departure',)
