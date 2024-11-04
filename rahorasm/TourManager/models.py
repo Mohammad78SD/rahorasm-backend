@@ -64,7 +64,7 @@ class Airport(models.Model):
     
 class Flight(models.Model):
     tour = models.ForeignKey('Tour', on_delete=models.CASCADE, related_name='flights')
-    airline = models.ForeignKey(AirLine, on_delete=models.PROTECT)
+    airline = models.ForeignKey(AirLine, on_delete=models.PROTECT, related_name='flight_airlines')
     departure = jmodels.jDateTimeField()
     arrival = jmodels.jDateTimeField()
     origin_airport = models.ForeignKey(Airport, on_delete=models.PROTECT, related_name='origin_airport')
