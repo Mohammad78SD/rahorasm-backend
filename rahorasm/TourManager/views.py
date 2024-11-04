@@ -65,6 +65,8 @@ class TourListView(generics.ListAPIView):
         city_name = self.request.query_params.get('city', None)
         country_name = self.request.query_params.get('country', None)
         continent_name = self.request.query_params.get('continent', None)
+        
+        is_featured = self.request.query_params.get('is_featured', None)
 
         if city_name:
             queryset = queryset.filter(destination__name=city_name)
@@ -72,7 +74,15 @@ class TourListView(generics.ListAPIView):
             queryset = queryset.filter(destination__country__name=country_name)
         if continent_name:
             queryset = queryset.filter(destination__country__continent__name=continent_name)
+            
+        if is_featured:
+            queryset = queryset.filter(is_featured=True)
 
+        ordering = self.request.query_params.get('order_by', None)
+        print(ordering)
+        if ordering:
+            queryset = queryset.order_by(ordering)
+            
         return queryset
     
 class TourDetailView(generics.RetrieveAPIView):
@@ -83,6 +93,49 @@ class FlightDetailView(generics.RetrieveAPIView):
     queryset = Flight.objects.all()
     serializer_class = FlightSerializer
     
+    
+    
+class Filters(APIView):
+    def get(self, request):
+        city_name = self.request.query_params.get('city', None)
+        country_name = self.request.query_params.get('country', None)
+        continent_name = self.request.query_params.get('continent', None)
+        airlinefilter = []
+        if city_name:
+            airlines = AirLine.objects.all().filter(flight_airlines__tour__destination__name=city_name).distinct()
+            for airline in airlines:
+                flights_quantity = Flight.objects.all().filter(airline=airline, tour__destination__name=city_name).count()
+                airlinefilter.append({
+                    "id": airline.id,
+                    "name": airline.name,
+                    "tours_quantity": flights_quantity
+                })
+        if country_name:
+            airlines = AirLine.objects.all().filter(flight_airlines__tour__destination__country__name=country_name).distinct()
+            for airline in airlines:
+                flights_quantity = Flight.objects.all().filter(airline=airline, tour__destination__country__name=country_name).count()
+                airlinefilter.append({
+                    "id": airline.id,
+                    "name": airline.name,
+                    "tours_quantity": flights_quantity
+                })
+        if continent_name:
+            airlines = AirLine.objects.all().filter(flight_airlines__tour__destination__country__continent__name=continent_name).distinct()
+            for airline in airlines:
+                flights_quantity = Flight.objects.all().filter(airline=airline, tour__destination__country__continent__name=continent_name).count()
+                airlinefilter.append({
+                    "id": airline.id,
+                    "name": airline.name,
+                    "tours_quantity": flights_quantity
+                })
+
+        
+        return Response({
+            "airlines": airlinefilter,
+        })
+        
+        
+        
 class NavbarAPIView(APIView):
     def get(self, request):
         # Correctly prefetch related countries and cities
@@ -104,14 +157,14 @@ class NavbarAPIView(APIView):
                 country_entry = {
                     "id": country['id'],
                     "name": country['name'],
-                    "path": f"/tour/tours/?country{continent['name']}",
+                    "path": f"/tour/tours/?country{country['name']}",
                     "children": []
                 }
                 for city in country.get('cities', []):
                     city_entry = {
                         "id": city['id'],
                         "name": city['name'],
-                        "path": f"/tour/tours/?city{continent['name']}"
+                        "path": f"/tour/tours/?city{city['name']}"
                     }
                     country_entry["children"].append(city_entry)
 
@@ -128,7 +181,7 @@ class NavbarAPIView(APIView):
             children = {
                 "id": visa['id'],
                 "name": f"ویزای {visa['title']}",
-                "path": f"/visa/visas/?visa={visa['id']}"
+                "path": f"/visa/{visa['id']}"
             }
             visa_entry["children"].append(children)
         navbar.append(visa_entry)
@@ -141,12 +194,12 @@ class NavbarAPIView(APIView):
         about = {
             "id": 5,
             "name": "درباره ما",
-            "path": "/about-us"
+            "path": "/about"
         }
         contact = {
             "id": 6,
             "name": "تماس با ما",
-            "path": "/contact-us"
+            "path": "/contact"
         }
         navbar.append(blog)
         navbar.append(about)
