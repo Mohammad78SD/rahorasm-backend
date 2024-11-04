@@ -9,7 +9,7 @@ admin.site.register(Airport)
 
 class FlightInline(admin.TabularInline):
     model = Flight
-    extra = 1
+    extra = 0
     
 @admin.register(Tour)
 class TourAdmin(admin.ModelAdmin):
