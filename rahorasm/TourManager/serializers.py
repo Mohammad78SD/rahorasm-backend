@@ -2,7 +2,7 @@ from rest_framework import serializers
 from .models import City, Country, AirLine, Airport, Tour, Continent, Flight
 import jdatetime
 import pytz
-
+from HotelManager.serializers import HotelPriceSerializer
 
 class AirLineSerializer(serializers.ModelSerializer):
     class Meta:
@@ -41,7 +41,6 @@ class TourInFlightSerializer(serializers.ModelSerializer):
 
 class FlightSerializer(serializers.ModelSerializer):
     departure = serializers.SerializerMethodField()
-    # arrival = serializers.SerializerMethodField()
     return_departure = serializers.SerializerMethodField()
     return_arrival = serializers.SerializerMethodField()
     
@@ -51,6 +50,8 @@ class FlightSerializer(serializers.ModelSerializer):
     return_destination_airport = AirportSerializer()
     airline = AirLineSerializer()
     tour = TourInFlightSerializer()
+    
+    hotel_prices = HotelPriceSerializer(many=True, read_only=True, source='flight_hotels')
     class Meta:
         model = Flight
         fields = '__all__'
@@ -71,6 +72,11 @@ class FlightSerializer(serializers.ModelSerializer):
 
 class TourSerializer(serializers.ModelSerializer):
     flights = FlightSerializer(many=True, read_only=True)
+    start_date = serializers.SerializerMethodField()
+    
+    def get_start_date(self, obj):
+        jdate = obj.start_date
+        return jdate.togregorian()
     class Meta:
         model = Tour
         fields = '__all__'
