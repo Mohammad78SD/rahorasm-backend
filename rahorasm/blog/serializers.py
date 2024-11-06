@@ -23,7 +23,7 @@ class CommentSerializer(serializers.ModelSerializer):
         
 class PostSerializer(serializers.ModelSerializer):
     
-    Category = CategorySerializer(many=True)
+    category = CategorySerializer(many=True)
     author = UserSerializer()
     class Meta:
         model = Post
