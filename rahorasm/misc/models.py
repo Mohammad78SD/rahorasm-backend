@@ -4,10 +4,10 @@ from django.core.exceptions import ValidationError
 
 class ContactDetail(models.Model):
     ICON_CHOICES = [
-        ('FaMapLocationDot', 'آیکن نقشه'),
-        ('FaEnvelope', 'آیکن ایمیل'),
-        ('FaPhoneFlip', 'آیکن تلفن'),
-        ('MdAccessTimeFilled', 'آیکن ساعت'),
+        ('material-symbols-light:location-on-rounded', 'آیکن نقشه'),
+        ('material-symbols-light:mail-rounded', 'آیکن ایمیل'),
+        ('material-symbols-light:phone-enabled', 'آیکن تلفن'),
+        ('material-symbols-light:alarm-rounded', 'آیکن ساعت'),
     ]
 
     icon = models.CharField(max_length=50, choices=ICON_CHOICES)
@@ -19,11 +19,11 @@ class ContactDetail(models.Model):
     
 class AboutDetail(models.Model):
     ICON_CHOICES = [
-        ('MdTravelExplore', 'آیکن سفر'),
-        ('FaPlaneDeparture', 'آیکن هواپیما'),
-        ('BiTrip', 'آیکن تور'),
-        ('FaPassport', 'آیکن پاسپورت'),
-        ('BsFillPersonVcardFill', 'آیکن مشتری'),
+        ('material-symbols-light:trip', 'آیکن سفر'),
+        ('material-symbols-light:airplane-ticket', 'آیکن هواپیما'),
+        ('material-symbols-light:tour', 'آیکن تور'),
+        ('material-symbols-light:id-card', 'آیکن پاسپورت'),
+        ('material-symbols-light:account-box', 'آیکن مشتری'),
     ]
 
     icon = models.CharField(max_length=50, choices=ICON_CHOICES)
