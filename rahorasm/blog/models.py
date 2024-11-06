@@ -12,7 +12,7 @@ class Category(models.Model):
     edited_at = jmodels.jDateTimeField(auto_now=True)
     
     def __str__(self):
-        return "بدون عنوان"
+        return self.title
     
     class Meta:
         verbose_name = "دسته بندی"
@@ -31,7 +31,7 @@ class Post(models.Model):
     published = models.BooleanField(default=False)
     
     def __str__(self):
-        return "بدون عنوان"
+        return self.title
     class Meta:
         verbose_name = "مطلب"
         verbose_name_plural = "مطالب"
@@ -45,7 +45,7 @@ class Comment(models.Model):
     edited_at = jmodels.jDateTimeField(auto_now=True)
     approved = models.BooleanField(default=False)
     def __str__(self):
-        return "بدون عنوان"
+        return self.content
     class Meta:
         verbose_name = "دیدگاه"
         verbose_name_plural = "دیدگاه ها"
