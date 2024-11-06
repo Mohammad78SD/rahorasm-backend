@@ -1,6 +1,7 @@
 from django.db import models
 from django_jalali.db import models as jmodels
-
+import jdatetime
+    
 class Continent(models.Model):
     name = models.CharField(max_length=200)
     created_at = jmodels.jDateTimeField(auto_now_add=True)
@@ -32,8 +33,8 @@ class City(models.Model):
     class Meta:
         verbose_name = "شهر"
         verbose_name_plural = "شهر ها"
-    
 
+    
 class AirLine(models.Model):
     name = models.CharField(max_length=200)
     logo = models.ImageField(upload_to='airline_logos/', null=True, blank=True)
@@ -80,7 +81,7 @@ class Flight(models.Model):
     
     
     def __str__(self):
-        return f'{self.tour.title} تاریخ {self.departure}'
+        return f'{self.tour.title} تاریخ {self.departure.strftime("%Y-%m-%d")}'
     class Meta:
         verbose_name = "رفت و برگشت"
         verbose_name_plural = "رفت و برگشت ها"
@@ -88,14 +89,16 @@ class Flight(models.Model):
 class Tour(models.Model):
     title = models.CharField(max_length=200)
     description = models.TextField()
+    start_date = jmodels.jDateField(default=jdatetime.date.today)
     destination = models.ForeignKey(City, on_delete=models.PROTECT)
     tour_type = models.CharField(max_length=200, choices=[('هوایی', 'هوایی'), ('زمینی', 'زمینی')])
     needed_documents = models.TextField()
     agency_service = models.TextField()
     tour_guide = models.TextField()
-    tour_duration = models.CharField(max_length=200, default='7 روز')
+    tour_duration = models.IntegerField(default=3)
     is_featured = models.BooleanField(default=False)
     least_price = models.DecimalField(max_digits=20, decimal_places=2, null=True, blank=True)
+    max_price = models.DecimalField(max_digits=20, decimal_places=2, null=True, blank=True)
 
     created_at = jmodels.jDateTimeField(auto_now_add=True)
     edited_at = jmodels.jDateTimeField(auto_now=True)
@@ -104,15 +107,23 @@ class Tour(models.Model):
         super().save(*args, **kwargs)
 
         self.update_least_price()
+        self.update_max_price()
         
     def update_least_price(self):
         least_price = self.flights.aggregate(models.Min('start_price'))['start_price__min']
         if least_price is not None:
             self.least_price = least_price
             super().save(update_fields=['least_price'])
+            
+    def update_max_price(self):
+        max_price = self.flights.aggregate(models.Max('start_price'))['start_price__max']
+        if max_price is not None:
+            self.max_price = max_price
+            super().save(update_fields=['max_price'])
         
     def __str__(self):
         return self.title
+    
     class Meta:
         verbose_name = "تور"
         verbose_name_plural = "تور ها"
