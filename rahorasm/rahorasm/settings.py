@@ -55,6 +55,7 @@ INSTALLED_APPS = [
     'blog',
     'TourManager',
     'VisaManager',
+    'HotelManager',
     'misc',
 ]
 
@@ -156,7 +157,7 @@ CACHES = {
 # Internationalization
 # https://docs.djangoproject.com/en/5.1/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'fa-ir'
 
 TIME_ZONE = 'Asia/Tehran'
 
