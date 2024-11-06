@@ -8,12 +8,11 @@ User = get_user_model()
 class Category(models.Model):
     parent = models.ForeignKey('self', on_delete=models.CASCADE, null=True, blank=True)
     title = models.CharField(max_length=200)
-    description = models.CharField(max_length=200)
     created_at = jmodels.jDateTimeField(auto_now_add=True)
     edited_at = jmodels.jDateTimeField(auto_now=True)
     
     def __str__(self):
-        return self.title
+        return "بدون عنوان"
     
     class Meta:
         verbose_name = "دسته بندی"
@@ -23,7 +22,7 @@ class Post(models.Model):
     meta_title = models.CharField(max_length=200)
     meta_description = models.CharField(max_length=200)
     title = models.CharField(max_length=200)
-    Category = models.ManyToManyField(Category, related_name='posts', blank=True)
+    category = models.ManyToManyField(Category, related_name='posts', blank=True)
     image = models.ImageField(upload_to='blog/images/', null=True, blank=True)
     author = models.ForeignKey(User, on_delete=models.CASCADE)
     content = CKEditor5Field('Text', config_name='extends')
@@ -32,7 +31,7 @@ class Post(models.Model):
     published = models.BooleanField(default=False)
     
     def __str__(self):
-        return self.title
+        return "بدون عنوان"
     class Meta:
         verbose_name = "مطلب"
         verbose_name_plural = "مطالب"
@@ -46,7 +45,7 @@ class Comment(models.Model):
     edited_at = jmodels.jDateTimeField(auto_now=True)
     approved = models.BooleanField(default=False)
     def __str__(self):
-        return self.content
+        return "بدون عنوان"
     class Meta:
         verbose_name = "دیدگاه"
         verbose_name_plural = "دیدگاه ها"
