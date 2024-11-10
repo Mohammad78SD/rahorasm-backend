@@ -172,6 +172,43 @@ class UserSessionView(APIView):
         else:
             return Response({"message": "User is not authenticated"}, status=status.HTTP_401_UNAUTHORIZED)
 
+
+class UserProfileView(APIView):
+    
+        permission_classes = [IsAuthenticated]
+    
+        def get(self, request):
+            user = request.user
+            if user.is_authenticated:
+                user_data = {
+                    'id': user.id,
+                    'name': user.name,
+                    'phone_number': user.phone_number,
+                    'email': user.email,
+                    'is_staff': user.is_staff,
+                }
+                return Response({"payload": user_data}, status=status.HTTP_200_OK)
+            else:
+                return Response({"message": "User is not authenticated"}, status=status.HTTP_401_UNAUTHORIZED)
+            
+        def put(self, request):
+            user = request.user
+            if user.is_authenticated:
+                user_data = {
+                    'name': request.data.get('name', user.name),
+                    'phone_number': request.data.get('phone_number', user.phone_number),
+                    'email': request.data.get('email', user.email),
+                    'password': request.data.get('password', user.password),
+                }
+                user.name = user_data['name']
+                user.phone_number = user_data['phone_number']
+                user.email = user_data['email']
+                user.set_password(user_data['password'])
+                user.save()
+                return Response({"message": "اطلاعات کاربری با موفقیت به روز رسانی شد"}, status=status.HTTP_200_OK)
+            else:
+                return Response({"message": "User is not authenticated"}, status=status.HTTP_401_UNAUTHORIZED)
+            
         
         
 class ContactUsView(generics.CreateAPIView):
