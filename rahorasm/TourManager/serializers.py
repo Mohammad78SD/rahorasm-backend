@@ -82,7 +82,19 @@ class TourSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-
+class TourFlightsSerializer(serializers.ModelSerializer):
+    departure = serializers.SerializerMethodField()
+    return_departure = serializers.SerializerMethodField()
+    def get_departure(self, obj):
+        jdate = obj.departure
+        print(jdate.tzinfo)
+        return jdate.togregorian()
+    def get_return_departure(self, obj):
+        jdate = obj.return_departure
+        return jdate.togregorian()
+    class Meta:
+        model = Flight
+        fields = 'departure', 'return_departure', 'id'
 
 
 class NavbarCitySerializer(serializers.ModelSerializer):
