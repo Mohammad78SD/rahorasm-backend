@@ -14,7 +14,8 @@ from .serializers import (
     TourSerializer,
     FlightSerializer,
     NavbarContinentSerializer,
-    NavbarCountrySerializer
+    NavbarCountrySerializer,
+    TourFlightsSerializer
 )
 from .filters import (
     CityFilter,
@@ -24,6 +25,8 @@ from .filters import (
     TourFilter,
 )
 from rest_framework.filters import OrderingFilter
+from HotelManager.models import Hotel
+from HotelManager.serializers import HotelSerializer
 
 class CityListView(generics.ListAPIView):
     queryset = City.objects.all()
@@ -164,6 +167,13 @@ class FlightDetailView(generics.RetrieveAPIView):
     serializer_class = FlightSerializer
     
     
+class TourFlights(APIView):
+    def get(self, request, pk):
+        flights = Flight.objects.all().filter(tour__id=pk)
+        serializer = TourFlightsSerializer(flights, many=True)
+        return Response(serializer.data)
+    
+    
     
 class Filters(APIView):
     def get(self, request):
@@ -264,6 +274,8 @@ class NavbarAPIView(APIView):
         visas = Visa.objects.all()
         visa_data = VisaSerializer(visas, many=True).data
         
+        
+        
         navbar = []
         for continent in continent_data:
             continent_entry = {
@@ -292,7 +304,6 @@ class NavbarAPIView(APIView):
             navbar.append(continent_entry)
             
         visa_entry={
-            "id": 3,
             "name": "ویزا",
             "children": []
         }
@@ -304,19 +315,38 @@ class NavbarAPIView(APIView):
             }
             visa_entry["children"].append(children)
         navbar.append(visa_entry)
-            
+        
+        
+        hotels = {
+            "name": "هتل ها",
+            "children": []
+        }
+        for continent in continent_data:
+            hotels_continent_entry = {
+                "id": continent['id'],
+                "name": f"هتل های {continent['name']}یی",
+                "path": f"hotels/?continent={continent['name']}",
+                "children": []
+            }
+            for country in continent.get('countries', []):
+                hotels_country_entry = {
+                    "id": country['id'],
+                    "name": f"هتل های {country['name']}",
+                    "path": f"/hotels/?country={country['name']}",
+                }
+                hotels_continent_entry["children"].append(hotels_country_entry)
+            hotels["children"].append(hotels_continent_entry)
+        navbar.append(hotels)
+        
         blog = {
-            "id": 4,
             "name": "وبلاگ",
             "path": "/blog"
         }
         about = {
-            "id": 5,
             "name": "درباره ما",
             "path": "/about"
         }
         contact = {
-            "id": 6,
             "name": "تماس با ما",
             "path": "/contact"
         }
