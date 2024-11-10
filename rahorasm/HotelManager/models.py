@@ -39,6 +39,18 @@ class SportFacilities(models.Model):
         return self.name
     class Meta:
         verbose_name = "امکانات ورزشی"
+        
+class HotelImage(models.Model):
+    hotel = models.ForeignKey('Hotel', on_delete=models.CASCADE, related_name='hotel_images')
+    image = models.ImageField(upload_to='hotel_images/')
+    alt = models.CharField(max_length=200, null=True, blank=True)
+    created_at = jmodels.jDateTimeField(auto_now_add=True)
+    edited_at = jmodels.jDateTimeField(auto_now=True)
+    def __str__(self):
+        return self.hotel.name
+    class Meta:
+        verbose_name = "تصویر هتل"
+        verbose_name_plural = "تصاویر هتل"
     
         
 class Hotel(models.Model):
