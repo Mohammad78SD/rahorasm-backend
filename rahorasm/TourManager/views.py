@@ -325,14 +325,14 @@ class NavbarAPIView(APIView):
             hotels_continent_entry = {
                 "id": continent['id'],
                 "name": f"هتل های {continent['name']}یی",
-                "path": f"hotels/?continent={continent['name']}",
+                "path": f"hotel/?continent={continent['name']}",
                 "children": []
             }
             for country in continent.get('countries', []):
                 hotels_country_entry = {
                     "id": country['id'],
                     "name": f"هتل های {country['name']}",
-                    "path": f"/hotels/?country={country['name']}",
+                    "path": f"/hotel/?country={country['name']}",
                 }
                 hotels_continent_entry["children"].append(hotels_country_entry)
             hotels["children"].append(hotels_continent_entry)
