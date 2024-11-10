@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import HotelPrice, Hotel, HotelFacilities, RoomFacilities, RecreationalFacilities, SportFacilities
+from .models import HotelPrice, Hotel, HotelFacilities, RoomFacilities, RecreationalFacilities, SportFacilities, HotelImage
 
 class HotelFacilitiesSerializer(serializers.ModelSerializer):
     class Meta:
@@ -21,9 +21,22 @@ class SportFacilitiesSerializer(serializers.ModelSerializer):
         model = SportFacilities
         fields = ['name']
         
+class HotelImageSerializer(serializers.ModelSerializer):
+    image = serializers.SerializerMethodField()
 
+    class Meta:
+        model = HotelImage
+        fields = ['id', 'image', 'alt']
+
+    def get_image(self, obj):
+        request = self.context.get('request')
+        if request is None:
+            return None
+        return request.build_absolute_uri(obj.image.url)
 
 class HotelSerializer(serializers.ModelSerializer):
+    images = HotelImageSerializer(many=True, read_only=True, source='hotel_images')
+    
     hotel_facilities = HotelFacilitiesSerializer(many=True, read_only=True)
     room_facilities = RoomFacilitiesSerializer(many=True, read_only=True)
     recreational_facilities = RecreationalFacilitiesSerializer(many=True, read_only=True)
