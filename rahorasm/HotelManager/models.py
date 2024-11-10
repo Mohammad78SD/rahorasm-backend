@@ -1,6 +1,8 @@
 from django.db import models
 from django_jalali.db import models as jmodels
 from TourManager.models import City, Flight
+from django_ckeditor_5.fields import CKEditor5Field
+
         
 class HotelFacilities(models.Model):
     name = models.CharField(max_length=200)
@@ -50,6 +52,7 @@ class Hotel(models.Model):
     recreational_facilities = models.ManyToManyField(RecreationalFacilities, related_name='recreational_facilities')
     sport_facilities = models.ManyToManyField(SportFacilities, related_name='sport_facilities')
     description = models.TextField()
+    long_description = CKEditor5Field('توضیح بیشتر', config_name='extends', null=True, blank=True)
     created_at = jmodels.jDateTimeField(auto_now_add=True)
     edited_at = jmodels.jDateTimeField(auto_now=True)
     
