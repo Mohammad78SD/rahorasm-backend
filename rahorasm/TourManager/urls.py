@@ -8,7 +8,8 @@ from .views import (
     NavbarAPIView,
     TourDetailView,
     FlightDetailView,
-    Filters
+    Filters,
+    TourFlights,
 )
 
 urlpatterns = [
@@ -21,6 +22,7 @@ urlpatterns = [
     path('tour/<int:pk>/', TourDetailView.as_view(), name='tour_detail'),
     path('flight/<int:pk>/', FlightDetailView.as_view(), name='flight_detail'),
     path('navbar/', NavbarAPIView.as_view(), name='navbar'),
+    path('flights/<int:pk>/', TourFlights.as_view(), name='tour_flights'),
     
 
 ]
