@@ -16,6 +16,7 @@ class HotelList(generics.ListAPIView):
         'city__name': ['exact'],
         'city__country__name': ['exact'],
         'city__country__continent__name': ['exact'],
+        'is_featured': ['exact'],
     }
     
     def get_queryset(self):
@@ -23,10 +24,13 @@ class HotelList(generics.ListAPIView):
         city_name = self.request.query_params.get('city', None)
         country_name = self.request.query_params.get('country', None)
         continent_name = self.request.query_params.get('continent', None)
+        is_featured = self.request.query_params.get('is_featured', None)
         if city_name is not None:
             queryset = queryset.filter(city__name=city_name)
         if country_name is not None:
             queryset = queryset.filter(city__country__name=country_name)
         if continent_name is not None:
             queryset = queryset.filter(city__country__continent__name=continent_name)
+        if is_featured is not None:
+            queryset = queryset.filter(is_featured=is_featured)
         return queryset
