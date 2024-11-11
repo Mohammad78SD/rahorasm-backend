@@ -6,6 +6,13 @@ class QuestionSerializer(serializers.ModelSerializer):
         model = Question
         fields = ['id', 'question_text', 'answer_text']
 
+class VisaListSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Visa
+        fields = ['id', 'title']
+        
+
 class VisaSerializer(serializers.ModelSerializer):
     questions = QuestionSerializer(many=True)
 
