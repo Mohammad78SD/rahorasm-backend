@@ -15,7 +15,8 @@ from .serializers import (
     FlightSerializer,
     NavbarContinentSerializer,
     NavbarCountrySerializer,
-    TourFlightsSerializer
+    TourFlightsSerializer,
+    CityListSerializer,
 )
 from .filters import (
     CityFilter,
@@ -30,7 +31,7 @@ from HotelManager.serializers import HotelSerializer
 
 class CityListView(generics.ListAPIView):
     queryset = City.objects.all()
-    serializer_class = CitySerializer
+    serializer_class = CityListSerializer
     filter_backends = (DjangoFilterBackend,)
     filterset_class = CityFilter
 
@@ -207,8 +208,10 @@ class Filters(APIView):
             
             max_price = Tour.objects.all().filter(destination__name=city_name).order_by('-max_price').first()
             least_price = Tour.objects.all().filter(destination__name=city_name).order_by('least_price').first()
-            price_filter['max_price'] = max_price.max_price
-            price_filter['least_price'] = least_price.least_price
+            if(max_price):
+                price_filter['max_price'] = max_price.max_price
+            if(least_price):
+                price_filter['least_price'] = least_price.least_price
                 
         if country_name:
             airlines = AirLine.objects.all().filter(flight_airlines__tour__destination__country__name=country_name).distinct()
