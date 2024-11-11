@@ -26,7 +26,10 @@ class CitySerializer(serializers.ModelSerializer):
     class Meta:
         model = City
         fields = '__all__'
-
+class CityListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = City
+        fields = ('name',)
 class AirportSerializer(serializers.ModelSerializer):
     city = CitySerializer()
 
