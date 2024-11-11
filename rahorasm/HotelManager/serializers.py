@@ -1,5 +1,11 @@
 from rest_framework import serializers
 from .models import HotelPrice, Hotel, HotelFacilities, RoomFacilities, RecreationalFacilities, SportFacilities, HotelImage
+from TourManager.models import City
+
+class CitySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = City
+        fields = ['name']
 
 class HotelFacilitiesSerializer(serializers.ModelSerializer):
     class Meta:
@@ -41,6 +47,8 @@ class HotelSerializer(serializers.ModelSerializer):
     room_facilities = RoomFacilitiesSerializer(many=True, read_only=True)
     recreational_facilities = RecreationalFacilitiesSerializer(many=True, read_only=True)
     sport_facilities = SportFacilitiesSerializer(many=True, read_only=True)
+    
+    city = CitySerializer()
     
     class Meta:
         model = Hotel
