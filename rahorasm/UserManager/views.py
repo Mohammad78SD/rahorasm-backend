@@ -194,16 +194,16 @@ class UserProfileView(APIView):
         def put(self, request):
             user = request.user
             if user.is_authenticated:
-                user_data = {
-                    'name': request.data.get('name', user.name),
-                    'phone_number': request.data.get('phone_number', user.phone_number),
-                    'email': request.data.get('email', user.email),
-                    'password': request.data.get('password', user.password),
-                }
-                user.name = user_data['name']
-                user.phone_number = user_data['phone_number']
-                user.email = user_data['email']
-                user.set_password(user_data['password'])
+                name = request.data.get('name', user.name)
+                email = request.data.get('email', user.email)
+                password = request.data.get('password', user.password)
+
+                if name is not None:
+                    user.name = name
+                if email is not None:
+                    user.email = email
+                if password is not None:
+                    user.set_password(password)
                 user.save()
                 return Response({"message": "اطلاعات کاربری با موفقیت به روز رسانی شد"}, status=status.HTTP_200_OK)
             else:
