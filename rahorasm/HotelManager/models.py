@@ -56,6 +56,7 @@ class HotelImage(models.Model):
 class Hotel(models.Model):
     name = models.CharField(max_length=200)
     address = models.TextField()
+    is_featured = models.BooleanField(default=False)
     star = models.IntegerField(choices=[(1, '1 ستاره'), (2, '2 ستاره'), (3, '3 ستاره'), (4, '4 ستاره'), (5, '5 ستاره'), (6, '6 ستاره')], default=1)
     city = models.ForeignKey(City, on_delete=models.PROTECT)
     location_on_map = models.CharField(max_length=200, null=True, blank=True)
