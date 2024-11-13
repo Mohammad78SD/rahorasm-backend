@@ -4,17 +4,11 @@ User = get_user_model()
 from django_jalali.db import models as jmodels
 
 
-class person(models.Model):
-    persian_name = models.CharField(max_length=100)
-    english_name = models.CharField(max_length=100)
-    persian_last_name = models.CharField(max_length=100)
-    english_last_name = models.CharField(max_length=100)
-    national_code = models.CharField(max_length=10)
-    birth_date =  jmodels.jDateField()
 
 class Reserve(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     hotel = models.ForeignKey('HotelManager.Hotel', on_delete=models.CASCADE)
+    tour = models.ForeignKey('TourManager.Tour', on_delete=models.CASCADE)
     flight = models.ForeignKey('TourManager.Flight', on_delete=models.CASCADE)
     hotel_price = models.ForeignKey('HotelManager.HotelPrice', on_delete=models.CASCADE)
     two_bed_quantity = models.IntegerField()
@@ -45,4 +39,13 @@ class Reserve(models.Model):
         if self.child_no_bed_quantity>0:
             self.final_price = self.final_price + self.hotel_price.child_no_bed_price * self.child_no_bed_quantity
         super(Reserve, self).save(*args, **kwargs)
+
+
+class Person(models.Model):
+    persian_name = models.CharField(max_length=100)
+    english_name = models.CharField(max_length=100)
+    national_code = models.CharField(max_length=10)
+    birth_date =  models.CharField(max_length=10)
+    passport_number = models.CharField(max_length=10)
+    reserve = models.ForeignKey('Reserve', on_delete=models.CASCADE)
     
