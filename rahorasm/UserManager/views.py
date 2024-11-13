@@ -58,7 +58,7 @@ class LoginRequestOTPView(APIView):
             
             # Set cooldown
             cache.set(f"otp_cooldown_{phone_number}", True, 60)
-            print(otp)
+            # print(otp)
             send_otp(phone_number, otp)
             
             return Response({"message": "کد یکبار مصرف با موفقیت ارسال شد"}, status=status.HTTP_200_OK)
@@ -114,7 +114,7 @@ class SignupRequestView(APIView):
                 
                 # Set cooldown
                 cache.set(f"otp_cooldown_{phone_number}", True, 60)
-                print(otp)
+                # print(otp)
                 send_otp(phone_number, otp)
                 
                 return Response({"message": "کد یکبار مصرف ارسال شد"}, status=status.HTTP_200_OK)
