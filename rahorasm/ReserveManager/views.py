@@ -5,8 +5,29 @@ from .models import Reserve, Person
 from .serializers import ReserveSerializer
 from HotelManager.models import Hotel, HotelPrice
 from TourManager.models import Tour, Flight
+from rest_framework.permissions import IsAuthenticated
+
+# login required view
+
+class ListReserveView(APIView):
+    permission_classes = [IsAuthenticated]
+    def get(self, request):
+        user = request.user
+        reserves = Reserve.objects.filter(user=user)
+        return Response(ReserveSerializer(reserves, many=True).data, status=status.HTTP_200_OK)
+    
+class RetrieveReserveView(APIView):
+    permission_classes = [IsAuthenticated]
+    def get(self, request, pk):
+        user = request.user
+        try:
+            reserve = Reserve.objects.get(id=pk, user=user)
+            return Response(ReserveSerializer(reserve).data, status=status.HTTP_200_OK)
+        except Reserve.DoesNotExist:
+            return Response({"error": "Invalid reserve id"}, status=status.HTTP_400_BAD_REQUEST)
 
 class CreateReserveView(APIView):
+    permission_classes = [IsAuthenticated]
     def post(self, request):
         data = request.data
         
