@@ -5,47 +5,51 @@ from django_ckeditor_5.fields import CKEditor5Field
 
         
 class HotelFacilities(models.Model):
-    name = models.CharField(max_length=200)
-    created_at = jmodels.jDateTimeField(auto_now_add=True)
-    edited_at = jmodels.jDateTimeField(auto_now=True)
+    name = models.CharField(max_length=200, verbose_name="نام")
+    created_at = jmodels.jDateTimeField(auto_now_add=True, verbose_name="تاریخ ایجاد")
+    edited_at = jmodels.jDateTimeField(auto_now=True, verbose_name="تاریخ ویرایش")
     def __str__(self):
         return self.name
     class Meta:
         verbose_name = "امکانات هتل"
+        verbose_name_plural = "امکانات هتل"
         
 class RoomFacilities(models.Model):
-    name = models.CharField(max_length=200)
-    created_at = jmodels.jDateTimeField(auto_now_add=True)
-    edited_at = jmodels.jDateTimeField(auto_now=True)
+    name = models.CharField(max_length=200, verbose_name="نام")
+    created_at = jmodels.jDateTimeField(auto_now_add=True, verbose_name="تاریخ ایجاد")
+    edited_at = jmodels.jDateTimeField(auto_now=True, verbose_name="تاریخ ویرایش")
     def __str__(self):
         return self.name
     class Meta:
         verbose_name = "امکانات اتاق"
+        verbose_name_plural = "امکانات اتاق"
         
 class RecreationalFacilities(models.Model):
-    name = models.CharField(max_length=200)
-    created_at = jmodels.jDateTimeField(auto_now_add=True)
-    edited_at = jmodels.jDateTimeField(auto_now=True)
+    name = models.CharField(max_length=200, verbose_name="نام")
+    created_at = jmodels.jDateTimeField(auto_now_add=True, verbose_name="تاریخ ایجاد")
+    edited_at = jmodels.jDateTimeField(auto_now=True, verbose_name="تاریخ ویرایش")
     def __str__(self):
         return self.name
     class Meta:
         verbose_name = "امکانات تفریحی"
+        verbose_name_plural = "امکانات تفریحی"
         
 class SportFacilities(models.Model):
-    name = models.CharField(max_length=200)
-    created_at = jmodels.jDateTimeField(auto_now_add=True)
-    edited_at = jmodels.jDateTimeField(auto_now=True)
+    name = models.CharField(max_length=200, verbose_name="نام")
+    created_at = jmodels.jDateTimeField(auto_now_add=True, verbose_name="تاریخ ایجاد")
+    edited_at = jmodels.jDateTimeField(auto_now=True, verbose_name="تاریخ ویرایش")
     def __str__(self):
         return self.name
     class Meta:
         verbose_name = "امکانات ورزشی"
+        verbose_name_plural = "امکانات ورزشی"
         
 class HotelImage(models.Model):
-    hotel = models.ForeignKey('Hotel', on_delete=models.CASCADE, related_name='hotel_images')
-    image = models.ImageField(upload_to='hotel_images/')
-    alt = models.CharField(max_length=200, null=True, blank=True)
-    created_at = jmodels.jDateTimeField(auto_now_add=True)
-    edited_at = jmodels.jDateTimeField(auto_now=True)
+    hotel = models.ForeignKey('Hotel', on_delete=models.CASCADE, related_name='hotel_images', verbose_name="هتل")
+    image = models.ImageField(upload_to='hotel_images/', verbose_name="تصویر")
+    alt = models.CharField(max_length=200, null=True, blank=True, verbose_name="توضیح")
+    created_at = jmodels.jDateTimeField(auto_now_add=True, verbose_name="تاریخ ایجاد")
+    edited_at = jmodels.jDateTimeField(auto_now=True, verbose_name="تاریخ ویرایش")
     def __str__(self):
         return self.hotel.name
     class Meta:
@@ -54,20 +58,20 @@ class HotelImage(models.Model):
     
         
 class Hotel(models.Model):
-    name = models.CharField(max_length=200)
-    address = models.TextField()
-    is_featured = models.BooleanField(default=False)
-    star = models.IntegerField(choices=[(1, '1 ستاره'), (2, '2 ستاره'), (3, '3 ستاره'), (4, '4 ستاره'), (5, '5 ستاره'), (6, '6 ستاره')], default=1)
-    city = models.ForeignKey(City, on_delete=models.PROTECT)
-    location_on_map = models.CharField(max_length=200, null=True, blank=True)
-    hotel_facilities = models.ManyToManyField(HotelFacilities, related_name='hotel_facilities')
-    room_facilities = models.ManyToManyField(RoomFacilities, related_name='room_facilities')
-    recreational_facilities = models.ManyToManyField(RecreationalFacilities, related_name='recreational_facilities')
-    sport_facilities = models.ManyToManyField(SportFacilities, related_name='sport_facilities')
-    description = models.TextField()
+    name = models.CharField(max_length=200, verbose_name="نام")
+    address = models.TextField(verbose_name="آدرس")
+    is_featured = models.BooleanField(default=False, verbose_name="ویژه")
+    star = models.IntegerField(choices=[(1, '1 ستاره'), (2, '2 ستاره'), (3, '3 ستاره'), (4, '4 ستاره'), (5, '5 ستاره'), (6, '6 ستاره')], default=1, verbose_name="ستاره")
+    city = models.ForeignKey(City, on_delete=models.PROTECT, verbose_name="شهر")
+    location_on_map = models.CharField(max_length=200, null=True, blank=True, verbose_name="موقعیت روی نقشه")
+    hotel_facilities = models.ManyToManyField(HotelFacilities, related_name='hotel_facilities', verbose_name="امکانات هتل")
+    room_facilities = models.ManyToManyField(RoomFacilities, related_name='room_facilities', verbose_name="امکانات اتاق")
+    recreational_facilities = models.ManyToManyField(RecreationalFacilities, related_name='recreational_facilities', verbose_name="امکانات تفریحی")
+    sport_facilities = models.ManyToManyField(SportFacilities, related_name='sport_facilities', verbose_name="امکانات ورزشی")
+    description = models.TextField(verbose_name="توضیحات")
     long_description = CKEditor5Field('توضیح بیشتر', config_name='extends', null=True, blank=True)
-    created_at = jmodels.jDateTimeField(auto_now_add=True)
-    edited_at = jmodels.jDateTimeField(auto_now=True)
+    created_at = jmodels.jDateTimeField(auto_now_add=True, verbose_name="تاریخ ایجاد")
+    edited_at = jmodels.jDateTimeField(auto_now=True, verbose_name="تاریخ ویرایش")
     
     def __str__(self):
         return self.name
@@ -77,15 +81,15 @@ class Hotel(models.Model):
         verbose_name_plural = "هتل ها"
         
 class HotelPrice(models.Model):
-    hotel = models.ForeignKey(Hotel, on_delete=models.CASCADE, related_name='hotel_prices')
-    flight = models.ForeignKey(Flight, on_delete=models.CASCADE, related_name='flight_hotels')
-    two_bed_price = models.DecimalField(max_digits=20, decimal_places=2)
-    one_bed_price = models.DecimalField(max_digits=20, decimal_places=2)
-    child_with_bed_price = models.DecimalField(max_digits=20, decimal_places=2)
-    child_no_bed_price = models.DecimalField(max_digits=20, decimal_places=2)
+    hotel = models.ForeignKey(Hotel, on_delete=models.CASCADE, related_name='hotel_prices', verbose_name="هتل")
+    flight = models.ForeignKey(Flight, on_delete=models.CASCADE, related_name='flight_hotels', verbose_name="پرواز")
+    two_bed_price = models.DecimalField(max_digits=20, decimal_places=2, verbose_name="قیمت دو تخته")
+    one_bed_price = models.DecimalField(max_digits=20, decimal_places=2, verbose_name="قیمت یک تخته")
+    child_with_bed_price = models.DecimalField(max_digits=20, decimal_places=2, verbose_name="قیمت کودک با تخت")
+    child_no_bed_price = models.DecimalField(max_digits=20, decimal_places=2, verbose_name="قیمت کودک بدون تخت")
     
-    created_at = jmodels.jDateTimeField(auto_now_add=True)
-    edited_at = jmodels.jDateTimeField(auto_now=True)
+    created_at = jmodels.jDateTimeField(auto_now_add=True, verbose_name="تاریخ ایجاد")
+    edited_at = jmodels.jDateTimeField(auto_now=True, verbose_name="تاریخ ویرایش")
 
     def __str__(self):
         return f'{self.hotel.name} - {self.flight.tour.title}'

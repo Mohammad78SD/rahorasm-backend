@@ -49,3 +49,6 @@ class Person(models.Model):
     passport_number = models.CharField(max_length=10)
     reserve = models.ForeignKey('Reserve', on_delete=models.CASCADE)
     
+    class Meta:
+        verbose_name = "اطلاعات شخص"
+        verbose_name_plural = "اطلاعات اشخاص"

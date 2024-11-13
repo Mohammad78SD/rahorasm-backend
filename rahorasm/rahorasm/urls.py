@@ -23,6 +23,10 @@ from rest_framework_simplejwt.views import (
     TokenRefreshView,
 )
 
+admin.site.site_title = "پنل ادمین راه و رسم"
+admin.site.site_header = "آژانس مسافرتی راه و رسم"
+admin.site.index_title = "راه و رسم"
+
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('auth/', include('UserManager.urls')),

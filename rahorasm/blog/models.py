@@ -6,10 +6,10 @@ from django.contrib.auth import get_user_model
 User = get_user_model()
 
 class Category(models.Model):
-    parent = models.ForeignKey('self', on_delete=models.CASCADE, null=True, blank=True)
-    title = models.CharField(max_length=200)
-    created_at = jmodels.jDateTimeField(auto_now_add=True)
-    edited_at = jmodels.jDateTimeField(auto_now=True)
+    parent = models.ForeignKey('self', on_delete=models.CASCADE, null=True, blank=True, verbose_name="دسته بالایی")
+    title = models.CharField(max_length=200, verbose_name="عنوان")
+    created_at = jmodels.jDateTimeField(auto_now_add=True, verbose_name="تاریخ ایجاد")
+    edited_at = jmodels.jDateTimeField(auto_now=True, verbose_name="تاریخ ویرایش")
     
     def __str__(self):
         return self.title
@@ -19,16 +19,16 @@ class Category(models.Model):
         verbose_name_plural = "دسته بندی ها"
 
 class Post(models.Model):
-    meta_title = models.CharField(max_length=200)
-    meta_description = models.CharField(max_length=200)
-    title = models.CharField(max_length=200)
-    category = models.ManyToManyField(Category, related_name='posts', blank=True)
-    image = models.ImageField(upload_to='blog/images/', null=True, blank=True)
-    author = models.ForeignKey(User, on_delete=models.CASCADE)
+    meta_title = models.CharField(max_length=200, verbose_name="عنوان متا")
+    meta_description = models.CharField(max_length=200, verbose_name="توضیحات متا")
+    title = models.CharField(max_length=200, verbose_name="عنوان")
+    category = models.ManyToManyField(Category, related_name='posts', blank=True, verbose_name="دسته بندی")
+    image = models.ImageField(upload_to='blog/images/', null=True, blank=True, verbose_name="تصویر")
+    author = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name="نویسنده")
     content = CKEditor5Field('Text', config_name='extends')
-    created_at = jmodels.jDateTimeField(auto_now_add=True)
-    edited_at = jmodels.jDateTimeField(auto_now=True)
-    published = models.BooleanField(default=False)
+    created_at = jmodels.jDateTimeField(auto_now_add=True, verbose_name="تاریخ ایجاد")
+    edited_at = jmodels.jDateTimeField(auto_now=True, verbose_name="تاریخ ویرایش")
+    published = models.BooleanField(default=False, verbose_name="منتشر شده")
     
     def __str__(self):
         return self.title
@@ -38,12 +38,12 @@ class Post(models.Model):
     
     
 class Comment(models.Model):
-    post = models.ForeignKey(Post, on_delete=models.CASCADE)
-    author = models.ForeignKey(User, on_delete=models.CASCADE)
-    content = models.TextField()
-    created_at = jmodels.jDateTimeField(auto_now_add=True)
-    edited_at = jmodels.jDateTimeField(auto_now=True)
-    approved = models.BooleanField(default=False)
+    post = models.ForeignKey(Post, on_delete=models.CASCADE, verbose_name="مطلب")
+    author = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name="نویسنده")
+    content = models.TextField(verbose_name="محتوا")
+    created_at = jmodels.jDateTimeField(auto_now_add=True, verbose_name="تاریخ ایجاد")
+    edited_at = jmodels.jDateTimeField(auto_now=True, verbose_name="تاریخ ویرایش")
+    approved = models.BooleanField(default=False, verbose_name="وضعیت تایید")
     def __str__(self):
         return self.content
     class Meta:
