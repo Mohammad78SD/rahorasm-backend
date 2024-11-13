@@ -357,3 +357,25 @@ class NavbarAPIView(APIView):
         navbar.append(about)
         navbar.append(contact)
         return Response(navbar)
+    
+    
+class Home(APIView):
+    def get(self, request):
+        featured_tours = Tour.objects.all().filter(is_featured=True).order_by('-created_at')[:10]
+        featured_tours_serializer = TourSerializer(featured_tours, many=True)
+        
+        latest_asia_tours = Tour.objects.all().filter(destination__country__continent__name='آسیا').order_by('-created_at')[:10]
+        latest_tours_serializer = TourSerializer(latest_asia_tours, many=True)
+        
+        latest_europe_tours = Tour.objects.all().filter(destination__country__continent__name='اروپا').order_by('-created_at')[:10]
+        latest_europe_tours_serializer = TourSerializer(latest_europe_tours, many=True)
+        
+        featured_hotels = Hotel.objects.all().filter(is_featured=True).order_by('-created_at')[:10]
+        featured_hotels_serializer = HotelSerializer(featured_hotels, many=True)
+        
+        return Response({
+            "featured_tours": featured_tours_serializer.data,
+            "latest_asia_tours": latest_tours_serializer.data,
+            "latest_europe_tours": latest_europe_tours_serializer.data,
+            "featured_hotels": featured_hotels_serializer.data
+        })
