@@ -256,9 +256,7 @@ class Filters(APIView):
             max_price = Tour.objects.all().filter(destination__country__continent__name=continent_name).order_by('-max_price').first()
             least_price = Tour.objects.all().filter(destination__country__continent__name=continent_name).order_by('least_price').first()
             price_filter['max_price'] = max_price.max_price
-            price_filter['least_price'] = least_price.least_price
-            print(price_filter)
-    
+            price_filter['least_price'] = least_price.least_price    
         
         return Response({
             "airlines": airlinefilter,
@@ -284,21 +282,21 @@ class NavbarAPIView(APIView):
             continent_entry = {
                 "id": continent['id'],
                 "name": f"تور {continent['name']}",
-                "path": f"/tour/tours/?continent={continent['name']}",
+                "path": f"/tour/tours?continent={continent['name']}",
                 "children": []
             }
             for country in continent.get('countries', []):
                 country_entry = {
                     "id": country['id'],
                     "name": country['name'],
-                    "path": f"/tour/tours/?country={country['name']}",
+                    "path": f"/tour/tours?country={country['name']}",
                     "children": []
                 }
                 for city in country.get('cities', []):
                     city_entry = {
                         "id": city['id'],
                         "name": city['name'],
-                        "path": f"/tour/tours/?city={city['name']}"
+                        "path": f"/tour/tours?city={city['name']}"
                     }
                     country_entry["children"].append(city_entry)
 
@@ -328,14 +326,14 @@ class NavbarAPIView(APIView):
             hotels_continent_entry = {
                 "id": continent['id'],
                 "name": f"هتل های {continent['name']}یی",
-                "path": f"hotel/?continent={continent['name']}",
+                "path": f"hotel?continent={continent['name']}",
                 "children": []
             }
             for country in continent.get('countries', []):
                 hotels_country_entry = {
                     "id": country['id'],
                     "name": f"هتل های {country['name']}",
-                    "path": f"/hotel/?country={country['name']}",
+                    "path": f"/hotel?country={country['name']}",
                 }
                 hotels_continent_entry["children"].append(hotels_country_entry)
             hotels["children"].append(hotels_continent_entry)
