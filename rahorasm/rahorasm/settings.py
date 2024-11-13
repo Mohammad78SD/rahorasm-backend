@@ -57,6 +57,7 @@ INSTALLED_APPS = [
     'VisaManager',
     'HotelManager',
     'misc',
+    'ReserveManager',
 ]
 
 REST_FRAMEWORK = {
