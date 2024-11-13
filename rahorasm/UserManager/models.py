@@ -75,7 +75,7 @@ class ContactForm(models.Model):
         ('Complaints', 'انتقادات'),
     ]
     name = models.CharField(max_length=50)
-    phone = models.CharField(max_length=15, validators=[phone_regex])
+    phone = models.CharField(max_length=15)
     email = models.EmailField(max_length=50)
     subject = models.CharField(max_length=200, choices=SUBJECT_CHOICES)
     decription = models.TextField()
