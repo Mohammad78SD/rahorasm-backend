@@ -89,6 +89,7 @@ class Flight(models.Model):
 class Tour(models.Model):
     title = models.CharField(max_length=200)
     description = models.TextField()
+    image = models.ImageField(upload_to='tour_images/', null=True, blank=True)
     start_date = jmodels.jDateField(default=jdatetime.date.today)
     destination = models.ForeignKey(City, on_delete=models.PROTECT)
     tour_type = models.CharField(max_length=200, choices=[('هوایی', 'هوایی'), ('زمینی', 'زمینی')])
