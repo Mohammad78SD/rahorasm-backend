@@ -61,7 +61,6 @@ class FlightSerializer(serializers.ModelSerializer):
         
     def get_departure(self, obj):
         jdate = obj.departure
-        print(jdate.tzinfo)
         return jdate.togregorian()
     def get_arrival(self, obj):
         jdate = obj.arrival
@@ -90,7 +89,6 @@ class TourFlightsSerializer(serializers.ModelSerializer):
     return_departure = serializers.SerializerMethodField()
     def get_departure(self, obj):
         jdate = obj.departure
-        print(jdate.tzinfo)
         return jdate.togregorian()
     def get_return_departure(self, obj):
         jdate = obj.return_departure
