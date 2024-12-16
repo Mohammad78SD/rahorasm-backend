@@ -59,6 +59,7 @@ INSTALLED_APPS = [
     'HotelManager',
     'misc',
     'ReserveManager',
+    'nested_admin',
 ]
 
 REST_FRAMEWORK = {
@@ -172,7 +173,12 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
 STATIC_URL = '/static/'
-STATIC_ROOT = os.path.join(BASE_DIR, 'static')  # Adjust the path as needed
+# Directory where collectstatic will gather all static files for production
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')  # Adjust the path as needed
+# Directory for development static files
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, "static"),
+]
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
