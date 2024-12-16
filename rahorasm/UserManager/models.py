@@ -37,13 +37,14 @@ class UserManager(BaseUserManager):
 
 
 class UserModel(AbstractBaseUser, PermissionsMixin):
-    phone_number = models.CharField(unique=True, max_length=15, null=False, blank=False, validators=[phone_regex])
-    name = models.CharField(max_length=50, blank=True, null=True)
+    phone_number = models.CharField(unique=True, max_length=15, null=False, blank=False, validators=[phone_regex], verbose_name="شماره تلفن")
+    name = models.CharField(max_length=50, blank=True, null=True, verbose_name="نام و نام خانوادگی")
     email = models.EmailField(
         max_length=50,
         blank=True,
         null=True,
         validators=[validate_email],
+        verbose_name="ایمیل",
     )
     first_login = models.BooleanField(default=False)
     verified = models.BooleanField(default=False, help_text='If otp verification got successful')
@@ -74,11 +75,11 @@ class ContactForm(models.Model):
         ('Suggestions', 'پیشنهادات'),
         ('Complaints', 'انتقادات'),
     ]
-    name = models.CharField(max_length=50)
-    phone = models.CharField(max_length=15)
-    email = models.EmailField(max_length=50)
-    subject = models.CharField(max_length=200, choices=SUBJECT_CHOICES)
-    decription = models.TextField()
+    name = models.CharField(max_length=50, verbose_name="نام و نام خانوادگی")
+    phone = models.CharField(max_length=15, verbose_name="شماره تلفن")
+    email = models.EmailField(max_length=50, verbose_name="ایمیل")
+    subject = models.CharField(max_length=200, choices=SUBJECT_CHOICES, verbose_name="موضوع")
+    decription = models.TextField(verbose_name="توضیحات")
     created_at = models.DateTimeField(auto_now_add=True)
     
     class Meta:
