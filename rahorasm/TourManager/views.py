@@ -28,6 +28,7 @@ from .filters import (
 from rest_framework.filters import OrderingFilter
 from HotelManager.models import Hotel
 from HotelManager.serializers import HotelSerializer
+from blog.models import Category
 
 class CityListView(generics.ListAPIView):
     queryset = City.objects.all()
@@ -117,7 +118,9 @@ class TourListView(generics.ListAPIView):
             queryset = queryset.order_by('-tour_duration')
         elif ordering == 'least_duration':
             queryset = queryset.order_by('tour_duration')
-            
+        
+        #i want to filter tours if the is_shown is true or not
+        queryset = queryset.filter(is_shown=True)
         return queryset
     
     def list(self, request, *args, **kwargs):
@@ -271,6 +274,7 @@ class NavbarAPIView(APIView):
         # Correctly prefetch related countries and cities
         continents = Continent.objects.prefetch_related('countries__cities').all()
         continent_data = NavbarContinentSerializer(continents, many=True).data
+        blog_categories = Category.objects.all()
 
         visas = Visa.objects.all()
         visa_data = VisaSerializer(visas, many=True).data
@@ -341,8 +345,17 @@ class NavbarAPIView(APIView):
         
         blog = {
             "name": "وبلاگ",
-            "path": "/blog"
+            "path": "/blog",
+            children: []
         }
+        for category in blog_categories:
+            blog_category = {
+                "id": category.id,
+                "name": category.name,
+                "path": f"/blog?category={category.id}"
+            }
+            blog["children"].append(blog_category)
+        
         about = {
             "name": "درباره ما",
             "path": "/about"
