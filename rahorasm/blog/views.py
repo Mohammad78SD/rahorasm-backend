@@ -3,8 +3,14 @@ from .models import Post,Comment
 from .serializers import PostSerializer, CommentSerializer
 
 class PostList(generics.ListAPIView):
-    queryset = Post.objects.all()
     serializer_class = PostSerializer
+
+    def get_queryset(self):
+        queryset = Post.objects.all()
+        category = self.request.query_params.get('category', None)
+        if category is not None:
+            queryset = queryset.filter(category=category)
+        return queryset
 
 class PostDetail(generics.RetrieveAPIView):
     queryset = Post.objects.all()
@@ -21,3 +27,4 @@ class CommentList(generics.ListCreateAPIView):
         post_id = self.kwargs['post_id']
         post = Post.objects.get(id=post_id)  # Get the post instance
         serializer.save(author=self.request.user, post=post)  # Associate the comment with the post
+        
