@@ -1,7 +1,11 @@
 from django.contrib import admin
 from .models import Hotel, HotelPrice, HotelFacilities, RoomFacilities, RecreationalFacilities, SportFacilities, HotelImage
 
-#i want to add inline field to add images to hotel in admin panel
+
+# You need to import this for adding jalali calendar widget
+import django_jalali.admin as jadmin
+
+
 class HotelImageInline(admin.TabularInline):
     model = HotelImage
     extra = 1
