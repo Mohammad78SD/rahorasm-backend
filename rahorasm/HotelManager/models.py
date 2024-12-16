@@ -61,7 +61,7 @@ class Hotel(models.Model):
     name = models.CharField(max_length=200, verbose_name="نام")
     address = models.TextField(verbose_name="آدرس")
     is_featured = models.BooleanField(default=False, verbose_name="ویژه")
-    star = models.IntegerField(choices=[(1, '1 ستاره'), (2, '2 ستاره'), (3, '3 ستاره'), (4, '4 ستاره'), (5, '5 ستاره'), (6, '6 ستاره')], default=1, verbose_name="ستاره")
+    star = models.IntegerField(choices=[(1, '1 ستاره'), (2, '2 ستاره'), (3, '3 ستاره'), (4, '4 ستاره'), (5, '5 ستاره'), (6, '5 ستاره تاپ'), (0, 'هتل آپارتمان')], default=1, verbose_name="ستاره")
     city = models.ForeignKey(City, on_delete=models.PROTECT, verbose_name="شهر")
     location_on_map = models.CharField(max_length=200, null=True, blank=True, verbose_name="موقعیت روی نقشه")
     hotel_facilities = models.ManyToManyField(HotelFacilities, related_name='hotel_facilities', verbose_name="امکانات هتل")
