@@ -6,17 +6,17 @@ from django_jalali.db import models as jmodels
 
 
 class Reserve(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    hotel = models.ForeignKey('HotelManager.Hotel', on_delete=models.CASCADE)
-    tour = models.ForeignKey('TourManager.Tour', on_delete=models.CASCADE)
-    flight = models.ForeignKey('TourManager.Flight', on_delete=models.CASCADE)
-    hotel_price = models.ForeignKey('HotelManager.HotelPrice', on_delete=models.CASCADE)
-    two_bed_quantity = models.IntegerField()
-    one_bed_quantity = models.IntegerField()
-    child_with_bed_quantity = models.IntegerField()
-    child_no_bed_quantity = models.IntegerField()
-    final_price = models.DecimalField(max_digits=20, decimal_places=2, default=0)
-    status = models.CharField(max_length=20, choices=[('review', 'در انتظار بررسی'), ('pending', 'در انتظار پرداخت'), ('paid', 'پرداخت شده'), ('canceled', 'لغو شده')], default='review')
+    user = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name="کاربر")
+    hotel = models.ForeignKey('HotelManager.Hotel', on_delete=models.CASCADE, verbose_name="هتل")
+    tour = models.ForeignKey('TourManager.Tour', on_delete=models.CASCADE, verbose_name="تور")
+    flight = models.ForeignKey('TourManager.Flight', on_delete=models.CASCADE, verbose_name="پرواز")
+    hotel_price = models.ForeignKey('HotelManager.HotelPrice', on_delete=models.CASCADE, verbose_name="قیمت هتل")
+    two_bed_quantity = models.IntegerField(verbose_name="تعداد دو تخته")
+    one_bed_quantity = models.IntegerField(verbose_name="تعداد یک تخته")
+    child_with_bed_quantity = models.IntegerField(verbose_name="تعداد کودک با تخت")
+    child_no_bed_quantity = models.IntegerField(verbose_name="تعداد کودک بدون تخت")
+    final_price = models.DecimalField(max_digits=20, decimal_places=2, default=0, verbose_name="قیمت نهایی")
+    status = models.CharField(max_length=20, choices=[('review', 'در انتظار بررسی'), ('pending', 'در انتظار پرداخت'), ('paid', 'پرداخت شده'), ('canceled', 'لغو شده')], default='review', verbose_name="وضعیت")
     
     created_at = models.DateTimeField(auto_now_add=True)
     edited_at = models.DateTimeField(auto_now=True)
@@ -42,12 +42,12 @@ class Reserve(models.Model):
 
 
 class Person(models.Model):
-    persian_name = models.CharField(max_length=100)
-    english_name = models.CharField(max_length=100)
-    national_code = models.CharField(max_length=10)
-    birth_date =  models.CharField(max_length=10)
-    passport_number = models.CharField(max_length=10)
-    reserve = models.ForeignKey('Reserve', on_delete=models.CASCADE)
+    persian_name = models.CharField(max_length=100, verbose_name="نام فارسی")
+    english_name = models.CharField(max_length=100, verbose_name="نام انگلیسی")
+    national_code = models.CharField(max_length=10, verbose_name="کد ملی")
+    birth_date =  models.CharField(max_length=10, verbose_name="تاریخ تولد")
+    passport_number = models.CharField(max_length=10, verbose_name="شماره پاسپورت")
+    reserve = models.ForeignKey('Reserve', on_delete=models.CASCADE, verbose_name="رزرو")
     
     class Meta:
         verbose_name = "اطلاعات شخص"
