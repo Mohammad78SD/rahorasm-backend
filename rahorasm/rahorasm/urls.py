@@ -22,6 +22,7 @@ from rest_framework_simplejwt.views import (
     TokenObtainPairView,
     TokenRefreshView,
 )
+import nested_admin
 
 admin.site.site_title = "پنل ادمین راه و رسم"
 admin.site.site_header = "آژانس مسافرتی راه و رسم"
@@ -29,6 +30,7 @@ admin.site.index_title = "راه و رسم"
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    # path('nested_admin/', nested_admin.urls),
     path('auth/', include('UserManager.urls')),
     path('blog/', include('blog.urls')),
     path('tour/', include('TourManager.urls')),
