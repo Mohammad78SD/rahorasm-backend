@@ -1,6 +1,8 @@
 from django.db import models
 from django_jalali.db import models as jmodels
 import jdatetime
+from django_ckeditor_5.fields import CKEditor5Field
+
     
 class Continent(models.Model):
     name = models.CharField(max_length=200, verbose_name="نام قاره")
@@ -88,7 +90,7 @@ class Flight(models.Model):
         
 class Tour(models.Model):
     title = models.CharField(max_length=200, verbose_name="عنوان تور")
-    description_editor = models.TextField(verbose_name="توضیحات تور", null=True, blank=True)
+    description_editor = CKEditor5Field('Text', config_name='extends', null=True, blank=True)
     occasion = models.CharField(max_length=200, verbose_name="مناسبت", null=True, blank=True)
     image = models.ImageField(upload_to='tour_images/', null=True, blank=True, verbose_name="تصویر")
     start_date = jmodels.jDateField(default=jdatetime.date.today, verbose_name="تاریخ شروع تور")
