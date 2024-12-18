@@ -346,12 +346,12 @@ class NavbarAPIView(APIView):
         blog = {
             "name": "وبلاگ",
             "path": "/blog",
-            children: []
+            "children": []
         }
         for category in blog_categories:
             blog_category = {
                 "id": category.id,
-                "name": category.name,
+                "name": category.title,
                 "path": f"/blog?category={category.id}"
             }
             blog["children"].append(blog_category)
