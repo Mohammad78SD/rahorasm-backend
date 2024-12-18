@@ -373,16 +373,16 @@ class NavbarAPIView(APIView):
 class Home(APIView):
     def get(self, request):
         featured_tours = Tour.objects.all().filter(is_featured=True).order_by('-created_at')[:10]
-        featured_tours_serializer = TourSerializer(featured_tours, many=True)
+        featured_tours_serializer = TourSerializer(featured_tours, many=True, context={'request': request})
         
         latest_asia_tours = Tour.objects.all().filter(destination__country__continent__name='آسیا').order_by('-created_at')[:10]
-        latest_tours_serializer = TourSerializer(latest_asia_tours, many=True)
+        latest_tours_serializer = TourSerializer(latest_asia_tours, many=True, context={'request': request})
         
         latest_europe_tours = Tour.objects.all().filter(destination__country__continent__name='اروپا').order_by('-created_at')[:10]
-        latest_europe_tours_serializer = TourSerializer(latest_europe_tours, many=True)
+        latest_europe_tours_serializer = TourSerializer(latest_europe_tours, many=True, context={'request': request})
         
         featured_hotels = Hotel.objects.all().filter(is_featured=True).order_by('-created_at')[:10]
-        featured_hotels_serializer = HotelSerializer(featured_hotels, many=True)
+        featured_hotels_serializer = HotelSerializer(featured_hotels, many=True, context={'request': request})
         
         return Response({
             "featured_tours": featured_tours_serializer.data,
