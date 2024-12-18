@@ -5,6 +5,7 @@ import pytz
 from HotelManager.serializers import HotelPriceSerializer
 
 class AirLineSerializer(serializers.ModelSerializer):
+
     class Meta:
         model = AirLine
         fields = '__all__'
@@ -73,12 +74,21 @@ class FlightSerializer(serializers.ModelSerializer):
         return jdate.togregorian()
 
 class TourSerializer(serializers.ModelSerializer):
+    image = serializers.SerializerMethodField()
     flights = FlightSerializer(many=True, read_only=True)
     start_date = serializers.SerializerMethodField()
-    
+
     def get_start_date(self, obj):
         jdate = obj.start_date
         return jdate.togregorian()
+
+    def get_image(self, obj):
+        request = self.context.get('request')
+        if request is None or not obj.image:
+            return None
+        return request.build_absolute_uri(obj.image.url)
+
+
     class Meta:
         model = Tour
         fields = '__all__'
