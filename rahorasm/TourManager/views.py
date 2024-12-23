@@ -123,44 +123,41 @@ class TourListView(generics.ListAPIView):
         queryset = queryset.filter(is_shown=True)
         return queryset
     
-    def list(self, request, *args, **kwargs):
-        queryset = self.get_queryset()
-        airline_ids = request.query_params.get('airline', None)
-        max_price = request.query_params.get('max_price', None)
-        least_price = request.query_params.get('least_price', None)
+def list(self, request, *args, **kwargs):
+    queryset = self.get_queryset()
+    airline_ids = request.query_params.get('airline', None)
+    max_price = request.query_params.get('max_price', None)
+    least_price = request.query_params.get('least_price', None)
+    
+    response_data = []
+    
+    for tour in queryset:
+        # Start with all flights for this tour
+        flights = tour.flights.all()
         
-        # Prepare the response list
-        response_data = []
-        flights_data = []
-        # If airline_ids are provided, filter flights
-        for tour in queryset:
-            if airline_ids:
-                airline_list = [airline_id.strip() for airline_id in airline_ids.split(',')]
-                # Filter flights for each tour based on the selected airlines
-                filtered_flights = tour.flights.filter(airline__id__in=airline_list)
-                # Serialize the filtered flights
-                flights_data = FlightSerializer(filtered_flights, many=True).data
-                
-            if max_price:
-                filtered_flights = tour.flights.filter(start_price__lte=max_price)
-                flights_data = FlightSerializer(filtered_flights, many=True).data
+        # Filter flights by airline_ids if provided
+        if airline_ids:
+            airline_list = [airline_id.strip() for airline_id in airline_ids.split(',')]
+            flights = flights.filter(airline__id__in=airline_list)
+        
+        # Filter flights by max_price if provided
+        if max_price:
+            flights = flights.filter(start_price__lte=max_price)
+        
+        # Filter flights by least_price if provided
+        if least_price:
+            flights = flights.filter(start_price__gte=least_price)
+        
+        # Serialize filtered flights
+        flights_data = FlightSerializer(flights, many=True).data
+        
+        # Serialize the tour and include the filtered flights
+        tour_data = TourSerializer(tour).data
+        tour_data['flights'] = flights_data
+        response_data.append(tour_data)
+    
+    return Response(response_data)
 
-            # Filter by least price if provided
-            if least_price:
-                filtered_flights = tour.flights.filter(start_price__gte=least_price)
-                flights_data = FlightSerializer(filtered_flights, many=True).data
-                
-
-            if not flights_data:
-                flights_data = FlightSerializer(tour.flights.all(), many=True).data
-            
-            # Serialize the tour with filtered flights
-            tour_data = TourSerializer(tour).data
-            tour_data['flights'] = flights_data  # Add filtered flights to the tour data
-            
-            response_data.append(tour_data)
-
-        return Response(response_data)
     
 class TourDetailView(generics.RetrieveAPIView):
     queryset = Tour.objects.all()
