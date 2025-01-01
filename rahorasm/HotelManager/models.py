@@ -59,6 +59,7 @@ class HotelImage(models.Model):
         
 class Hotel(models.Model):
     name = models.CharField(max_length=200, verbose_name="نام")
+    english_name = models.CharField(max_length=200, verbose_name="نام انگلیسی", null=True, blank=True)
     address = models.TextField(verbose_name="آدرس")
     is_featured = models.BooleanField(default=False, verbose_name="ویژه")
     star = models.IntegerField(choices=[(1, '1 ستاره'), (2, '2 ستاره'), (3, '3 ستاره'), (4, '4 ستاره'), (5, '5 ستاره'), (6, '5 ستاره تاپ'), (0, 'هتل آپارتمان')], default=1, verbose_name="ستاره")
