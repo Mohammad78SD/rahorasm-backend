@@ -1,8 +1,9 @@
 from rest_framework import serializers
-from .models import City, Country, AirLine, Airport, Tour, Continent, Flight
+from .models import City, Country, AirLine, Airport, Tour, Continent, FlightLeg, FlightTimes
 import jdatetime
 import pytz
 from HotelManager.serializers import HotelPriceSerializer
+from django.conf import settings
 
 class AirLineSerializer(serializers.ModelSerializer):
 
@@ -43,69 +44,126 @@ class TourInFlightSerializer(serializers.ModelSerializer):
         model = Tour
         fields = '__all__'
 
-class FlightSerializer(serializers.ModelSerializer):
-    departure = serializers.SerializerMethodField()
-    return_departure = serializers.SerializerMethodField()
-    return_arrival = serializers.SerializerMethodField()
-    
-    origin_airport = AirportSerializer()
-    destination_airport = AirportSerializer()
-    return_origin_airport = AirportSerializer()
-    return_destination_airport = AirportSerializer()
+
+class FlightLegSerializer(serializers.ModelSerializer):
     airline = AirLineSerializer()
-    tour = TourInFlightSerializer()
+    departure_airport = AirportSerializer()
+    arrival_airport = AirportSerializer()
+    departure = serializers.SerializerMethodField()
+    arrival = serializers.SerializerMethodField()
     
-    hotel_prices = HotelPriceSerializer(many=True, read_only=True, source='flight_hotels')
+    
+    # destination_airport = AirportSerializer()
+    # return_origin_airport = AirportSerializer()
+    # return_destination_airport = AirportSerializer()
+    # tour = TourInFlightSerializer()
+    
+    # hotel_prices = HotelPriceSerializer(many=True, read_only=True, source='flight_hotels')
     class Meta:
-        model = Flight
+        model = FlightLeg
         fields = '__all__'
         
     def get_departure(self, obj):
-        jdate = obj.departure
+        jdate = obj.departure_time
         return jdate.togregorian()
     def get_arrival(self, obj):
-        jdate = obj.arrival
-        return jdate.togregorian()
-    def get_return_departure(self, obj):
-        jdate = obj.return_departure
-        return jdate.togregorian()
-    def get_return_arrival(self, obj):
-        jdate = obj.return_arrival
+        jdate = obj.arrival_time
         return jdate.togregorian()
 
+class FlightSerializer(serializers.ModelSerializer):
+    departure_date = serializers.SerializerMethodField()
+    arrival_date = serializers.SerializerMethodField()
+    flight_Legs = FlightLegSerializer(many=True, read_only=True)
+    hotel_price = HotelPriceSerializer(many=True, read_only=True, source='flight_hotels')
+    tour = serializers.SerializerMethodField()
+    
+    class Meta:
+        model = FlightTimes
+        fields = '__all__'
+        
+    def get_departure_date(self, obj):
+        jdate = obj.departure_date
+        return jdate.togregorian()
+    def get_arrival_date(self, obj):
+        jdate = obj.arrival_date
+        return jdate.togregorian()
+    def get_tour(self, obj):
+        serializers = TourSerializer(Tour.objects.get(flight_times=obj))
+        return serializers.data
+
+class FlightTimeSerializer(serializers.ModelSerializer):
+    
+    departure_date = serializers.SerializerMethodField()
+    arrival_date = serializers.SerializerMethodField()
+    FlightLegs = FlightLegSerializer(many=True, read_only=True)
+    hotel_price = HotelPriceSerializer(many=True, read_only=True)
+    least_price = serializers.SerializerMethodField()
+    
+    
+    def get_least_price(self, obj):
+        prices = obj.hotel_price.all()  # Corrected the related name
+        least_price = None  # Start with None to handle no prices
+
+        for price in prices:
+            # Compare using the Decimal type
+            if least_price is None or price.two_bed_price < least_price:
+                least_price = price.two_bed_price
+            if least_price is None or price.one_bed_price < least_price:
+                least_price = price.one_bed_price
+
+        return least_price  # Returns None if no prices are found
+    
+    def get_departure_date(self, obj):
+        jdate = obj.departure_date
+        return jdate.togregorian()
+    def get_arrival_date(self, obj):
+        jdate = obj.arrival_date
+        return jdate.togregorian()
+
+    class Meta:
+        model = FlightTimes
+        fields = '__all__'
+        
+import environ
+env = environ.Env()
+environ.Env.read_env()
+    
 class TourSerializer(serializers.ModelSerializer):
     image = serializers.SerializerMethodField()
-    flights = FlightSerializer(many=True, read_only=True)
     start_date = serializers.SerializerMethodField()
-
+    destinations = CitySerializer(many=True)
+    flight_times = FlightTimeSerializer(many=True, read_only=True)
+    
+    class Meta:
+        model = Tour
+        fields = '__all__'
+        
     def get_start_date(self, obj):
         jdate = obj.start_date
         return jdate.togregorian()
 
     def get_image(self, obj):
-        request = self.context.get('request')
-        if request is None or not obj.image:
-            return None
-        return request.build_absolute_uri(obj.image.url)
+        if obj.image:
+            return f"{env('BACKEND_URL')}{settings.MEDIA_URL}{obj.image}"  # Construct the URL using MEDIA_URL
+        return None
 
 
-    class Meta:
-        model = Tour
-        fields = '__all__'
 
 
 class TourFlightsSerializer(serializers.ModelSerializer):
     departure = serializers.SerializerMethodField()
     return_departure = serializers.SerializerMethodField()
+    flight_Legs = FlightLegSerializer(many=True, read_only=True)
+    hotel_price = HotelPriceSerializer(many=True, read_only=True)   
     def get_departure(self, obj):
-        jdate = obj.departure
+        jdate = obj.departure_date
         return jdate.togregorian()
     def get_return_departure(self, obj):
-        jdate = obj.return_departure
+        jdate = obj.arrival_date
         return jdate.togregorian()
     class Meta:
-        model = Flight
-        fields = 'departure', 'return_departure', 'id'
+        model = FlightTimes
+        fields = '__all__'
 
 
 class NavbarCitySerializer(serializers.ModelSerializer):
