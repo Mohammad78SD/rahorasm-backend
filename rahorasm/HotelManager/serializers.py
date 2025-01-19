@@ -55,7 +55,7 @@ class HotelSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class HotelPriceSerializer(serializers.ModelSerializer):
-    hotel = HotelSerializer()
+    hotels = HotelSerializer(many=True, read_only=True)
     class Meta:
         model = HotelPrice
         fields = '__all__'
