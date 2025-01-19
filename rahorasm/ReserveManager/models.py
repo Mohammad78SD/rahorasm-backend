@@ -7,9 +7,7 @@ from django_jalali.db import models as jmodels
 
 class Reserve(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name="کاربر")
-    hotel = models.ForeignKey('HotelManager.Hotel', on_delete=models.CASCADE, verbose_name="هتل")
     tour = models.ForeignKey('TourManager.Tour', on_delete=models.CASCADE, verbose_name="تور")
-    flight = models.ForeignKey('TourManager.Flight', on_delete=models.CASCADE, verbose_name="پرواز")
     hotel_price = models.ForeignKey('HotelManager.HotelPrice', on_delete=models.CASCADE, verbose_name="قیمت هتل")
     two_bed_quantity = models.IntegerField(verbose_name="تعداد دو تخته")
     one_bed_quantity = models.IntegerField(verbose_name="تعداد یک تخته")
