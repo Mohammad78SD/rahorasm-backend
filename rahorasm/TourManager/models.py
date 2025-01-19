@@ -2,6 +2,7 @@ from django.db import models
 from django_jalali.db import models as jmodels
 import jdatetime
 from django_ckeditor_5.fields import CKEditor5Field
+from django.db.models import Min, Max
 
     
 class Continent(models.Model):
@@ -64,29 +65,35 @@ class Airport(models.Model):
     def save(self, *args, **kwargs):
         self.short_name = self.short_name.upper()
         super().save(*args, **kwargs)
-    
-class Flight(models.Model):
-    tour = models.ForeignKey('Tour', on_delete=models.CASCADE, related_name='flights', verbose_name="تور")
-    airline = models.ForeignKey(AirLine, on_delete=models.PROTECT, related_name='flight_airlines', verbose_name="هواپیمایی")
-    departure = jmodels.jDateTimeField(verbose_name="زمان پرواز رفت")
-    arrival = jmodels.jDateTimeField(verbose_name="زمان فرود رفت")
-    origin_airport = models.ForeignKey(Airport, on_delete=models.PROTECT, related_name='origin_airport', verbose_name="فرودگاه مبدا")
-    destination_airport = models.ForeignKey(Airport, on_delete=models.PROTECT, related_name='destination_airport', verbose_name="فرودگاه مقصد")
-    return_departure = jmodels.jDateTimeField(verbose_name="زمان پرواز برگشت")
-    return_arrival = jmodels.jDateTimeField(verbose_name="زمان فرود برگشت")
-    return_origin_airport = models.ForeignKey(Airport, on_delete=models.PROTECT, related_name='return_origin_airport', verbose_name="فرودگاه مبدا برگشت")
-    return_destination_airport = models.ForeignKey(Airport, on_delete=models.PROTECT, related_name='return_destination_airport', verbose_name="فرودگاه مقصد برگشت")
-    start_price = models.DecimalField(max_digits=20, decimal_places=2, verbose_name="شروع قیمت پروازها")
-    
-    created_at = jmodels.jDateTimeField(auto_now_add=True)
-    edited_at = jmodels.jDateTimeField(auto_now=True)
-    
-    
-    def __str__(self):
-        return f'{self.tour.title} تاریخ {self.departure.strftime("%Y-%m-%d")}'
+        
+        
+        
+class FlightLeg(models.Model):
+    airline = models.ForeignKey(AirLine, on_delete=models.PROTECT, related_name='flight_legs', verbose_name="هواپیمایی")
+    departure_airport = models.ForeignKey(Airport, on_delete=models.PROTECT, related_name='departure_legs', verbose_name="فرودگاه مبدا")
+    arrival_airport = models.ForeignKey(Airport, on_delete=models.PROTECT, related_name='arrival_legs', verbose_name="فرودگاه مقصد")
+    departure_time = jmodels.jDateTimeField(verbose_name="زمان پرواز")
+    arrival_time = jmodels.jDateTimeField(verbose_name="زمان فرود")
+    travel_class = models.CharField(max_length=50, choices=[('Economy', 'Economy'), ('Business', 'Business'), ('First', 'First')], verbose_name="کلاس سفر")
     class Meta:
-        verbose_name = "رفت و برگشت"
-        verbose_name_plural = "رفت و برگشت ها"
+        verbose_name = "پرواز"
+        verbose_name_plural = "پرواز ها"
+    def __str__(self):
+        return self.airline.name + ' از ' + self.departure_airport.name + ' به ' + self.arrival_airport.name + ' در تاریخ ' + self.departure_time.strftime('%d %B %Y ساعت %H:%') + ' تا ' + self.arrival_time.strftime('%d %B %Y ساعت %H:%')
+    
+from HotelManager.models import HotelPrice
+class FlightTimes(models.Model):
+    departure_date = jmodels.jDateTimeField(verbose_name="تاریخ رفت")
+    arrival_date = jmodels.jDateTimeField(verbose_name="تاریخ برگشت")
+    flight_Legs = models.ManyToManyField(FlightLeg, related_name='flightLegs', verbose_name="پرواز ها")
+    hotel_price = models.ManyToManyField(HotelPrice, related_name='tour_hotels', verbose_name="هتل ها")
+    
+    
+    class Meta:
+        verbose_name = "زمان پرواز"
+        verbose_name_plural = "زمان های پرواز"
+    def __str__(self):
+        return 'از '+ self.departure_date.strftime('%d %B %Y') + ' تا ' + self.arrival_date.strftime('%d %B %Y')
         
 class Tour(models.Model):
     title = models.CharField(max_length=200, verbose_name="عنوان تور")
@@ -94,7 +101,7 @@ class Tour(models.Model):
     occasion = models.CharField(max_length=200, verbose_name="مناسبت", null=True, blank=True)
     image = models.ImageField(upload_to='tour_images/', null=True, blank=True, verbose_name="تصویر")
     start_date = jmodels.jDateField(default=jdatetime.date.today, verbose_name="تاریخ شروع تور")
-    destination = models.ForeignKey(City, on_delete=models.PROTECT, related_name='tours', verbose_name="مقصد تور")
+    destinations = models.ManyToManyField(City, related_name='tours', verbose_name="مقصد تور")
     tour_type = models.CharField(max_length=200, choices=[('هوایی', 'هوایی'), ('زمینی', 'زمینی')], verbose_name="نوع تور")
     needed_documents = models.TextField(verbose_name="مدارک لازم")
     agency_service = models.TextField(verbose_name="خدمات آژانس")
@@ -105,26 +112,55 @@ class Tour(models.Model):
     least_price = models.DecimalField(max_digits=20, decimal_places=2, null=True, blank=True, verbose_name="کمترین قیمت تور")
     max_price = models.DecimalField(max_digits=20, decimal_places=2, null=True, blank=True, verbose_name="بیشترین قیمت تور")
 
+    flight_times = models.ManyToManyField(FlightTimes, related_name='tour_flights', verbose_name="زمان پرواز", null=True, blank=True)
+    
     created_at = jmodels.jDateTimeField(auto_now_add=True)
     edited_at = jmodels.jDateTimeField(auto_now=True)
     
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)
+        # self.update_prices()  # Update prices after saving
 
-        self.update_least_price()
-        self.update_max_price()
         
-    def update_least_price(self):
-        least_price = self.flights.aggregate(models.Min('start_price'))['start_price__min']
-        if least_price is not None:
-            self.least_price = least_price
-            super().save(update_fields=['least_price'])
-            
-    def update_max_price(self):
-        max_price = self.flights.aggregate(models.Max('start_price'))['start_price__max']
-        if max_price is not None:
-            self.max_price = max_price
-            super().save(update_fields=['max_price'])
+    def update_prices(self):
+        # Calculate least price
+        least_price = self.hotel_price.aggregate(
+            least_two_bed_price=Min('two_bed_price'),
+            least_one_bed_price=Min('one_bed_price'),
+            least_child_with_bed_price=Min('child_with_bed_price'),
+            least_child_no_bed_price=Min('child_no_bed_price')
+        )
+        
+        # Filter out None values and calculate the minimum
+        self.least_price = min(
+            filter(None, [
+                least_price['least_two_bed_price'],
+                least_price['least_one_bed_price'],
+                least_price['least_child_with_bed_price'],
+                least_price['least_child_no_bed_price']
+            ])
+        )
+
+        # Calculate max price
+        max_price = self.hotel_price.aggregate(
+            max_two_bed_price=Max('two_bed_price'),
+            max_one_bed_price=Max('one_bed_price'),
+            max_child_with_bed_price=Max('child_with_bed_price'),
+            max_child_no_bed_price=Max('child_no_bed_price')
+        )
+        
+        # Filter out None values and calculate the maximum
+        self.max_price = max(
+            filter(None, [
+                max_price['max_two_bed_price'],
+                max_price['max_one_bed_price'],
+                max_price['max_child_with_bed_price'],
+                max_price['max_child_no_bed_price']
+            ])
+        )
+
+        # Save the updated prices
+        super().save(update_fields=['least_price', 'max_price'])
         
     def __str__(self):
         return self.title
