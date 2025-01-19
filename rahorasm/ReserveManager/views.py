@@ -4,7 +4,7 @@ from rest_framework.views import APIView
 from .models import Reserve, Person
 from .serializers import ReserveSerializer
 from HotelManager.models import Hotel, HotelPrice
-from TourManager.models import Tour, Flight
+from TourManager.models import FlightTimes, FlightLeg, Tour
 from rest_framework.permissions import IsAuthenticated
 
 # login required view
@@ -33,17 +33,15 @@ class CreateReserveView(APIView):
         
         # Get required fields from the data
         user = request.user
-        tour_id = data.get("tourId")
-        hotel_id = data.get("hotelId")
-        room_id = data.get("roomId")
-        counts = data.get("counts", [])
+        flight_time_id = data.get("flight_time_id")
+        hotel_price_id = data.get("hotel_price_id")
+        counts = data.get("count", [])
         
         # Validate required foreign keys
         try:
-            tour = Tour.objects.get(id=tour_id)
-            hotel = Hotel.objects.get(id=hotel_id)
-            hotel_price = HotelPrice.objects.get(id=room_id)
-        except (Tour.DoesNotExist, Hotel.DoesNotExist, HotelPrice.DoesNotExist):
+            flight_time = FlightTimes.objects.get(id=flight_time_id)
+            hotel_price = HotelPrice.objects.get(id=hotel_price_id)
+        except (FlightTimes.DoesNotExist, HotelPrice.DoesNotExist):
             return Response({"error": "Invalid tour, hotel, or room id"}, status=status.HTTP_400_BAD_REQUEST)
 
         # Initialize room quantities
@@ -57,7 +55,6 @@ class CreateReserveView(APIView):
         persons_data = []
         for count in counts:
             quantity = count["count"]
-            price = float(count["price"])
             identification = count["identitication"]
             
             if identification == "two_bed_price":
@@ -82,13 +79,11 @@ class CreateReserveView(APIView):
                     "passport_number": user_data.get("passportNumber"),
                     "birth_date": user_data.get("birthday")
                 })
-
+        
         # Create the reserve instance
         reserve = Reserve.objects.create(
             user=user,
-            hotel=hotel,
-            tour=tour,
-            flight=Flight.objects.get(id=tour_id),  # Assuming you get flight by tour id
+            tour=Tour.objects.get(flight_times=flight_time),
             hotel_price=hotel_price,
             two_bed_quantity=two_bed_quantity,
             one_bed_quantity=one_bed_quantity,
@@ -102,4 +97,4 @@ class CreateReserveView(APIView):
         persons = [Person(reserve=reserve, **person_data) for person_data in persons_data]
         Person.objects.bulk_create(persons)
 
-        return Response(ReserveSerializer(reserve).data, status=status.HTTP_201_CREATED)
+        return Response(status=status.HTTP_201_CREATED)
