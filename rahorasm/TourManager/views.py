@@ -3,7 +3,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 import jdatetime
 from django_filters.rest_framework import DjangoFilterBackend
-from .models import City, Country, AirLine, Airport, Tour, Continent, Flight
+from .models import City, Country, AirLine, Airport, Tour, Continent, FlightLeg, FlightTimes
 from VisaManager.models import Visa
 from VisaManager.serializers import VisaSerializer
 from .serializers import (
@@ -12,11 +12,13 @@ from .serializers import (
     AirLineSerializer,
     AirportSerializer,
     TourSerializer,
-    FlightSerializer,
+    FlightLegSerializer,
     NavbarContinentSerializer,
     NavbarCountrySerializer,
     TourFlightsSerializer,
     CityListSerializer,
+    FlightTimeSerializer,
+    FlightSerializer,
 )
 from .filters import (
     CityFilter,
@@ -60,9 +62,9 @@ class TourListView(generics.ListAPIView):
     serializer_class = TourSerializer
     filter_backends = [DjangoFilterBackend]
     filterset_fields = {
-        'destination__name': ['exact'],
-        'destination__country__name': ['exact'],
-        'destination__country__continent__name': ['exact'],
+        'destinations__name': ['exact'],
+        'destinations__country__name': ['exact'],
+        'destinations__country__continent__name': ['exact'],
     }
 
     def get_queryset(self):
@@ -75,11 +77,11 @@ class TourListView(generics.ListAPIView):
         
 
         if city_name:
-            queryset = queryset.filter(destination__name=city_name)
+            queryset = queryset.filter(destinations__name=city_name)
         if country_name:
-            queryset = queryset.filter(destination__country__name=country_name)
+            queryset = queryset.filter(destinations__country__name=country_name)
         if continent_name:
-            queryset = queryset.filter(destination__country__continent__name=continent_name)
+            queryset = queryset.filter(destinations__country__continent__name=continent_name)
             
         if is_featured:
             queryset = queryset.filter(is_featured=True)
@@ -149,7 +151,7 @@ def list(self, request, *args, **kwargs):
             flights = flights.filter(start_price__gte=least_price)
         
         # Serialize filtered flights
-        flights_data = FlightSerializer(flights, many=True).data
+        flights_data = FlightLegSerializer(flights, many=True).data
         
         # Serialize the tour and include the filtered flights
         tour_data = TourSerializer(tour).data
@@ -164,16 +166,17 @@ class TourDetailView(generics.RetrieveAPIView):
     serializer_class = TourSerializer
     
 class FlightDetailView(generics.RetrieveAPIView):
-    queryset = Flight.objects.all()
+    queryset = FlightTimes.objects.all()
     serializer_class = FlightSerializer
     
     
 class TourFlights(APIView):
     def get(self, request, pk):
-        flights = Flight.objects.all().filter(tour__id=pk)
+        flights = FlightTimes.objects.filter(
+            tour_flights__id=pk  # Use the related name `tour_flights` to filter by `Tour` ID
+        ).distinct()
         serializer = TourFlightsSerializer(flights, many=True)
         return Response(serializer.data)
-    
     
     
 class Filters(APIView):
@@ -189,72 +192,75 @@ class Filters(APIView):
             "max_price": 0
         }
         if city_name:
-            airlines = AirLine.objects.all().filter(flight_airlines__tour__destination__name=city_name).distinct()
+            airlines = AirLine.objects.all().filter(flight_legs__flightLegs__tour_flights__destinations__name=city_name).distinct()
             for airline in airlines:
-                flights_quantity = Flight.objects.all().filter(airline=airline, tour__destination__name=city_name).count()
+                flights_quantity = FlightLeg.objects.filter(
+                    airline=airline,
+                    flightLegs__tour_flights__destinations__name=city_name
+                ).distinct().count()
                 airlinefilter.append({
                     "id": airline.id,
                     "name": airline.name,
                     "tours_quantity": flights_quantity
                 })
             
-            durations = Tour.objects.all().filter(destination__name=city_name).values('tour_duration').distinct()
+            durations = Tour.objects.all().filter(destinations__name=city_name).values('tour_duration').distinct()
             for duration in durations:
-                tours_quantity = Tour.objects.all().filter(destination__name=city_name, tour_duration=duration['tour_duration']).count()
+                tours_quantity = Tour.objects.all().filter(destinations__name=city_name, tour_duration=duration['tour_duration']).count()
                 duration_filter.append({
                     "duration": duration['tour_duration'],
                     "tours_quantity": tours_quantity
                 })
             
-            max_price = Tour.objects.all().filter(destination__name=city_name).order_by('-max_price').first()
-            least_price = Tour.objects.all().filter(destination__name=city_name).order_by('least_price').first()
+            max_price = Tour.objects.all().filter(destinations__name=city_name).order_by('-max_price').first()
+            least_price = Tour.objects.all().filter(destinations__name=city_name).order_by('least_price').first()
             if(max_price):
                 price_filter['max_price'] = max_price.max_price
             if(least_price):
                 price_filter['least_price'] = least_price.least_price
                 
         if country_name:
-            airlines = AirLine.objects.all().filter(flight_airlines__tour__destination__country__name=country_name).distinct()
+            airlines = AirLine.objects.all().filter(flight_airlines__tour__destinations__country__name=country_name).distinct()
             for airline in airlines:
-                flights_quantity = Flight.objects.all().filter(airline=airline, tour__destination__country__name=country_name).count()
+                flights_quantity = FlightLeg.objects.all().filter(airline=airline, tour__destinations__country__name=country_name).count()
                 airlinefilter.append({
                     "id": airline.id,
                     "name": airline.name,
                     "tours_quantity": flights_quantity
                 })
                 
-            durations = Tour.objects.all().filter(destination__country__name=country_name).values('tour_duration').distinct()
+            durations = Tour.objects.all().filter(destinations__country__name=country_name).values('tour_duration').distinct()
             for duration in durations:
-                tours_quantity = Tour.objects.all().filter(destination__country__name=country_name, tour_duration=duration['tour_duration']).count()
+                tours_quantity = Tour.objects.all().filter(destinations__country__name=country_name, tour_duration=duration['tour_duration']).count()
                 duration_filter.append({
                     "duration": duration['tour_duration'],
                     "tours_quantity": tours_quantity
                 })
-            max_price = Tour.objects.all().filter(destination__country__name=country_name).order_by('-max_price').first()
-            least_price = Tour.objects.all().filter(destination__country__name=country_name).order_by('least_price').first()
+            max_price = Tour.objects.all().filter(destinations__country__name=country_name).order_by('-max_price').first()
+            least_price = Tour.objects.all().filter(destinations__country__name=country_name).order_by('least_price').first()
             price_filter['max_price'] = max_price.max_price
             price_filter['least_price'] = least_price.least_price
                 
                 
         if continent_name:
-            airlines = AirLine.objects.all().filter(flight_airlines__tour__destination__country__continent__name=continent_name).distinct()
+            airlines = AirLine.objects.all().filter(flight_airlines__tour__destinations__country__continent__name=continent_name).distinct()
             for airline in airlines:
-                flights_quantity = Flight.objects.all().filter(airline=airline, tour__destination__country__continent__name=continent_name).count()
+                flights_quantity = FlightLeg.objects.all().filter(airline=airline, tour__destinations__country__continent__name=continent_name).count()
                 airlinefilter.append({
                     "id": airline.id,
                     "name": airline.name,
                     "tours_quantity": flights_quantity
                 })
                 
-            durations = Tour.objects.all().filter(destination__country__continent__name=continent_name).values('tour_duration').distinct()
+            durations = Tour.objects.all().filter(destinations__country__continent__name=continent_name).values('tour_duration').distinct()
             for duration in durations:
-                tours_quantity = Tour.objects.all().filter(destination__country__continent__name=continent_name, tour_duration=duration['tour_duration']).count()
+                tours_quantity = Tour.objects.all().filter(destinations__country__continent__name=continent_name, tour_duration=duration['tour_duration']).count()
                 duration_filter.append({
                     "duration": duration['tour_duration'],
                     "tours_quantity": tours_quantity
                 })
-            max_price = Tour.objects.all().filter(destination__country__continent__name=continent_name).order_by('-max_price').first()
-            least_price = Tour.objects.all().filter(destination__country__continent__name=continent_name).order_by('least_price').first()
+            max_price = Tour.objects.all().filter(destinations__country__continent__name=continent_name).order_by('-max_price').first()
+            least_price = Tour.objects.all().filter(destinations__country__continent__name=continent_name).order_by('least_price').first()
             price_filter['max_price'] = max_price.max_price
             price_filter['least_price'] = least_price.least_price    
         
@@ -372,10 +378,10 @@ class Home(APIView):
         featured_tours = Tour.objects.all().filter(is_featured=True).order_by('-created_at')[:10]
         featured_tours_serializer = TourSerializer(featured_tours, many=True, context={'request': request})
         
-        latest_asia_tours = Tour.objects.all().filter(destination__country__continent__name='آسیا').order_by('-created_at')[:10]
+        latest_asia_tours = Tour.objects.all().filter(destinations__country__continent__name='آسیا').order_by('-created_at')[:10]
         latest_tours_serializer = TourSerializer(latest_asia_tours, many=True, context={'request': request})
         
-        latest_europe_tours = Tour.objects.all().filter(destination__country__continent__name='اروپا').order_by('-created_at')[:10]
+        latest_europe_tours = Tour.objects.all().filter(destinations__country__continent__name='اروپا').order_by('-created_at')[:10]
         latest_europe_tours_serializer = TourSerializer(latest_europe_tours, many=True, context={'request': request})
         
         featured_hotels = Hotel.objects.all().filter(is_featured=True).order_by('-created_at')[:10]
