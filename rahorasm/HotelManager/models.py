@@ -1,6 +1,6 @@
 from django.db import models
 from django_jalali.db import models as jmodels
-from TourManager.models import City, Flight
+from TourManager.models import City
 from django_ckeditor_5.fields import CKEditor5Field
 
         
@@ -82,18 +82,22 @@ class Hotel(models.Model):
         verbose_name_plural = "هتل ها"
         
 class HotelPrice(models.Model):
-    hotel = models.ForeignKey(Hotel, on_delete=models.CASCADE, related_name='hotel_prices', verbose_name="هتل")
-    flight = models.ForeignKey(Flight, on_delete=models.CASCADE, related_name='flight_hotels', verbose_name="پرواز")
+    hotels = models.ManyToManyField(Hotel, related_name='hotel_prices', verbose_name="هتل")
     two_bed_price = models.DecimalField(max_digits=20, decimal_places=2, verbose_name="قیمت دو تخته")
     one_bed_price = models.DecimalField(max_digits=20, decimal_places=2, verbose_name="قیمت یک تخته")
     child_with_bed_price = models.DecimalField(max_digits=20, decimal_places=2, verbose_name="قیمت کودک با تخت")
     child_no_bed_price = models.DecimalField(max_digits=20, decimal_places=2, verbose_name="قیمت کودک بدون تخت")
+    other_currency = models.CharField(choices=[('EUR', 'یورو'), ('USD', 'دلار')], max_length=10, null=True, blank=True, verbose_name="ارز دیگر")
+    two_bed_price_other_currency = models.DecimalField(max_digits=20, decimal_places=2, null=True, blank=True, verbose_name="قیمت دو تخته در ارز دیگر")
+    one_bed_price_other_currency = models.DecimalField(max_digits=20, decimal_places=2, null=True, blank=True, verbose_name="قیمت یک تخته در ارز دیگر")
+    child_with_bed_price_other_currency = models.DecimalField(max_digits=20, decimal_places=2, null=True, blank=True, verbose_name="قیمت کودک با تخت در ارز دیگر")
+    child_no_bed_price_other_currency = models.DecimalField(max_digits=20, decimal_places=2, null=True, blank=True, verbose_name="قیمت کودک بدون تخت در ارز دیگر")
     
     created_at = jmodels.jDateTimeField(auto_now_add=True, verbose_name="تاریخ ایجاد")
     edited_at = jmodels.jDateTimeField(auto_now=True, verbose_name="تاریخ ویرایش")
 
     def __str__(self):
-        return f'{self.hotel.name} - {self.flight.tour.title}'
+        return ", ".join([i.name for i in self.hotels.all()]) + " با قیمت 2 تخته " + str(self.two_bed_price) + " تومان"
 
     class Meta:
         verbose_name = "قیمت هتل"
