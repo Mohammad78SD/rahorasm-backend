@@ -61,7 +61,10 @@ class UserModel(AbstractBaseUser, PermissionsMixin):
     objects = UserManager()
 
     def __str__(self):
-        return self.phone_number
+        if self.name:
+            return self.name
+        else: 
+            return self.phone_number
 
     
     class Meta:
