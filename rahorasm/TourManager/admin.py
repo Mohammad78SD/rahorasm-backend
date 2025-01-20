@@ -46,8 +46,8 @@ class FlightLegsInline(admin.TabularInline):
     verbose_name_plural = "پرواز ها"
 class FlightTimesAdmin(admin.ModelAdmin):
     search_fields = ['departure_time']
-    autocomplete_fields = ['flight_Legs', 'hotel_price']
     inlines = [FlightLegsInline, HotelPriceInline]
+    exclude = ('hotel_price', 'flight_Legs')
 admin.site.register(FlightTimes, FlightTimesAdmin)
 
 
