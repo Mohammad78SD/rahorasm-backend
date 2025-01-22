@@ -1,6 +1,8 @@
 from rest_framework import serializers
 from .models import HotelPrice, Hotel, HotelFacilities, RoomFacilities, RecreationalFacilities, SportFacilities, HotelImage
 from TourManager.models import City
+from django.conf import settings
+
 
 class CitySerializer(serializers.ModelSerializer):
     class Meta:
