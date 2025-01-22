@@ -79,7 +79,7 @@ class FlightLeg(models.Model):
         verbose_name = "پرواز"
         verbose_name_plural = "پرواز ها"
     def __str__(self):
-        return self.airline.name + ' از ' + self.departure_airport.name + ' به ' + self.arrival_airport.name + ' در تاریخ ' + self.departure_time.strftime('%d %B %Y ساعت %H:%') + ' تا ' + self.arrival_time.strftime('%d %B %Y ساعت %H:%')
+        return self.airline.name + ' از ' + self.departure_airport.name + ' به ' + self.arrival_airport.name + ' در تاریخ ' + self.departure_time.strftime('%Y/%m/%d ساعت %H:%') + ' تا ' + self.arrival_time.strftime('%Y/%m/%d ساعت %H:%')
     
 from HotelManager.models import HotelPrice
 class FlightTimes(models.Model):
@@ -93,7 +93,7 @@ class FlightTimes(models.Model):
         verbose_name = "زمان پرواز"
         verbose_name_plural = "زمان های پرواز"
     def __str__(self):
-        return 'از '+ self.departure_date.strftime('%d %B %Y') + ' تا ' + self.arrival_date.strftime('%d %B %Y')
+        return 'از '+ self.departure_date.strftime('%Y/%m/%d') + ' تا ' + self.arrival_date.strftime('%Y/%m/%d')
         
 class Tour(models.Model):
     title = models.CharField(max_length=200, verbose_name="عنوان تور")
@@ -102,11 +102,11 @@ class Tour(models.Model):
     image = models.ImageField(upload_to='tour_images/', null=True, blank=True, verbose_name="تصویر")
     start_date = jmodels.jDateField(default=jdatetime.date.today, verbose_name="تاریخ شروع تور")
     destinations = models.ManyToManyField(City, related_name='tours', verbose_name="مقصد تور")
-    tour_type = models.CharField(max_length=200, choices=[('هوایی', 'هوایی'), ('زمینی', 'زمینی')], verbose_name="نوع تور")
+    tour_type = models.CharField(max_length=200, choices=[('هوایی', 'هوایی'), ('زمینی', 'زمینی'), ('دریایی', 'دریایی')], verbose_name="نوع تور")
     needed_documents = models.TextField(verbose_name="مدارک لازم")
     agency_service = models.TextField(verbose_name="خدمات آژانس")
     tour_guide = models.TextField(verbose_name="راهنمای تور")
-    tour_duration = models.IntegerField(default=3, verbose_name="مدت زمان تور")
+    tour_duration = models.IntegerField(default=3, verbose_name="مدت زمان تور (شب)")
     is_featured = models.BooleanField(default=False, verbose_name="ویژه")
     is_shown = models.BooleanField(default=True, verbose_name="نمایش داده شود")
     least_price = models.DecimalField(max_digits=20, decimal_places=2, null=True, blank=True, verbose_name="کمترین قیمت تور")
