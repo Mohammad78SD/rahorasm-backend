@@ -27,6 +27,10 @@ class SportFacilitiesSerializer(serializers.ModelSerializer):
         model = SportFacilities
         fields = ['name']
         
+import environ
+env = environ.Env()
+environ.Env.read_env()
+
 class HotelImageSerializer(serializers.ModelSerializer):
     image = serializers.SerializerMethodField()
 
@@ -35,10 +39,10 @@ class HotelImageSerializer(serializers.ModelSerializer):
         fields = ['id', 'image', 'alt']
 
     def get_image(self, obj):
-        request = self.context.get('request')
-        if request is None:
-            return None
-        return request.build_absolute_uri(obj.image.url)
+        if obj.image:
+            return f"{env('BACKEND_URL')}{settings.MEDIA_URL}{obj.image}"  # Construct the URL using MEDIA_URL
+        return None
+
 
 class HotelSerializer(serializers.ModelSerializer):
     images = HotelImageSerializer(many=True, read_only=True, source='hotel_images')
