@@ -119,46 +119,24 @@ class Tour(models.Model):
     
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)
-        # self.update_prices()  # Update prices after saving
+        self.update_prices()  # Update prices after saving
 
         
     def update_prices(self):
+        hotel_prices = HotelPrice.objects.filter(tour_hotels__in=self.flight_times.all())
         # Calculate least price
-        least_price = self.hotel_price.aggregate(
-            least_two_bed_price=Min('two_bed_price'),
-            least_one_bed_price=Min('one_bed_price'),
-            least_child_with_bed_price=Min('child_with_bed_price'),
-            least_child_no_bed_price=Min('child_no_bed_price')
-        )
-        
-        # Filter out None values and calculate the minimum
-        self.least_price = min(
-            filter(None, [
-                least_price['least_two_bed_price'],
-                least_price['least_one_bed_price'],
-                least_price['least_child_with_bed_price'],
-                least_price['least_child_no_bed_price']
-            ])
-        )
-
-        # Calculate max price
-        max_price = self.hotel_price.aggregate(
-            max_two_bed_price=Max('two_bed_price'),
-            max_one_bed_price=Max('one_bed_price'),
-            max_child_with_bed_price=Max('child_with_bed_price'),
-            max_child_no_bed_price=Max('child_no_bed_price')
-        )
-        
-        # Filter out None values and calculate the maximum
-        self.max_price = max(
-            filter(None, [
-                max_price['max_two_bed_price'],
-                max_price['max_one_bed_price'],
-                max_price['max_child_with_bed_price'],
-                max_price['max_child_no_bed_price']
-            ])
-        )
-
+        if hotel_prices.exists():
+            # Get min and max two_bed_price from hotel_prices
+            min_price = hotel_prices.aggregate(models.Min('two_bed_price'))['two_bed_price__min']
+            max_price = hotel_prices.aggregate(models.Max('two_bed_price'))['two_bed_price__max']
+            
+            # Set the tour's prices
+            self.least_price = min_price
+            self.max_price = max_price
+        else:
+            # If no hotel prices found, you can set default values or leave as None
+            self.least_price = 0.0
+            self.max_price = 0.0
         # Save the updated prices
         super().save(update_fields=['least_price', 'max_price'])
         

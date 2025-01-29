@@ -69,7 +69,7 @@ class TourAdmin(admin.ModelAdmin):
     list_display = ('title', 'tour_type', 'is_featured', 'tour_duration')
     search_fields = ('title', 'description_editor')
     list_filter = ('tour_type', 'is_featured', 'is_shown')
-    exclude = ('flight_times',)
+    exclude = ('flight_times','least_price', 'max_price')
     inlines = [FlightTimesInline]
     
     
