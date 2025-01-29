@@ -95,7 +95,7 @@ class FlightTimeSerializer(serializers.ModelSerializer):
     
     departure_date = serializers.SerializerMethodField()
     arrival_date = serializers.SerializerMethodField()
-    FlightLegs = FlightLegSerializer(many=True, read_only=True)
+    flight_Legs = FlightLegSerializer(many=True, read_only=True)
     hotel_price = HotelPriceSerializer(many=True, read_only=True)
     least_price = serializers.SerializerMethodField()
     
@@ -133,6 +133,7 @@ class TourSerializer(serializers.ModelSerializer):
     start_date = serializers.SerializerMethodField()
     destinations = CitySerializer(many=True)
     flight_times = FlightTimeSerializer(many=True, read_only=True)
+    
     
     class Meta:
         model = Tour
