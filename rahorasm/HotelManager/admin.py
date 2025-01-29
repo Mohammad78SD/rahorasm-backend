@@ -44,6 +44,11 @@ class HotelPriceAdmin(admin.ModelAdmin):
     form = HotelPriceForm
     autocomplete_fields = ['hotels']
     search_fields = ['hotels__name']
+    def get_model_perms(self, request):
+        """
+        Return empty perms dict thus hiding the model from admin index.
+        """
+        return {}
     # list_display = ('formatted_two_bed_price', 'formatted_one_bed_price', 
     #                 'formatted_child_with_bed_price', 'formatted_child_no_bed_price')
 
@@ -88,8 +93,11 @@ admin.site.register(RecreationalFacilities, RecreationalFacilitiesAdmin)
 class SportFacilitiesAdmin(admin.ModelAdmin):
     search_fields = ['name']
 admin.site.register(SportFacilities, SportFacilitiesAdmin)
-admin.site.register(HotelImage)
 class HotelImageAdmin(admin.ModelAdmin):
-    list_display = ('hotel', 'caption', 'uploaded_at')
-    list_filter = ('hotel', 'uploaded_at')
     search_fields = ('caption', 'hotel__name')
+    def get_model_perms(self, request):
+        """
+        Return empty perms dict thus hiding the model from admin index.
+        """
+        return {}
+admin.site.register(HotelImage, HotelImageAdmin)
