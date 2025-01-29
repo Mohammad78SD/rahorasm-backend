@@ -13,7 +13,7 @@ class Continent(models.Model):
         return self.name
     class Meta:
         verbose_name = "قاره"
-        verbose_name_plural = "قاره ها"
+        verbose_name_plural = "2. قاره ها"
         
 class Country(models.Model):
     name = models.CharField(max_length=200, verbose_name="نام کشور")
@@ -24,7 +24,7 @@ class Country(models.Model):
         return self.name
     class Meta:
         verbose_name = "کشور"
-        verbose_name_plural = "کشور ها"
+        verbose_name_plural = "3. کشور ها"
         
 class City(models.Model):
     name = models.CharField(max_length=200, verbose_name="نام شهر")
@@ -35,7 +35,7 @@ class City(models.Model):
         return self.name
     class Meta:
         verbose_name = "شهر"
-        verbose_name_plural = "شهر ها"
+        verbose_name_plural = "4. شهر ها"
 
     
 class AirLine(models.Model):
@@ -47,7 +47,7 @@ class AirLine(models.Model):
         return self.name
     class Meta:
         verbose_name = "هواپیمایی"
-        verbose_name_plural = "هواپیمایی ها"
+        verbose_name_plural = "6. هواپیمایی ها"
     
 class Airport(models.Model):
     name = models.CharField(max_length=200, verbose_name="نام فرودگاه")
@@ -59,7 +59,7 @@ class Airport(models.Model):
         return self.name
     class Meta:
         verbose_name = "فرودگاه"
-        verbose_name_plural = "فرودگاه ها"
+        verbose_name_plural = "5. فرودگاه ها"
     
 
     def save(self, *args, **kwargs):
@@ -79,7 +79,7 @@ class FlightLeg(models.Model):
         verbose_name = "پرواز"
         verbose_name_plural = "پرواز ها"
     def __str__(self):
-        return self.airline.name + ' از ' + self.departure_airport.name + ' به ' + self.arrival_airport.name + ' در تاریخ ' + self.departure_time.strftime('%Y/%m/%d ساعت %H:%') + ' تا ' + self.arrival_time.strftime('%Y/%m/%d ساعت %H:%')
+        return self.airline.name + ' از ' + self.departure_airport.name + ' به ' + self.arrival_airport.name + ' در تاریخ ' + self.departure_time.strftime('%Y/%m/%d ساعت %H:%M') + ' تا ' + self.arrival_time.strftime('%Y/%m/%d ساعت %H:%M')
     
 from HotelManager.models import HotelPrice
 class FlightTimes(models.Model):
@@ -107,8 +107,8 @@ class Tour(models.Model):
     agency_service = models.TextField(verbose_name="خدمات آژانس")
     tour_guide = models.TextField(verbose_name="راهنمای تور")
     tour_duration = models.IntegerField(default=3, verbose_name="مدت زمان تور (شب)")
-    is_featured = models.BooleanField(default=False, verbose_name="ویژه")
-    is_shown = models.BooleanField(default=True, verbose_name="نمایش داده شود")
+    is_featured = models.BooleanField(default=False, verbose_name="آیا ویژه است؟")
+    is_shown = models.BooleanField(default=True, verbose_name="آیا اعتبار دارد؟")
     least_price = models.DecimalField(max_digits=20, decimal_places=2, null=True, blank=True, verbose_name="کمترین قیمت تور")
     max_price = models.DecimalField(max_digits=20, decimal_places=2, null=True, blank=True, verbose_name="بیشترین قیمت تور")
 
@@ -167,4 +167,4 @@ class Tour(models.Model):
     
     class Meta:
         verbose_name = "تور"
-        verbose_name_plural = "تور ها"
+        verbose_name_plural = "1. تور ها"
