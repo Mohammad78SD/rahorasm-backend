@@ -12,7 +12,7 @@ class HotelFacilities(models.Model):
         return self.name
     class Meta:
         verbose_name = "امکانات هتل"
-        verbose_name_plural = "امکانات هتل"
+        verbose_name_plural = "2. امکانات هتل"
         
 class RoomFacilities(models.Model):
     name = models.CharField(max_length=200, verbose_name="نام")
@@ -22,7 +22,7 @@ class RoomFacilities(models.Model):
         return self.name
     class Meta:
         verbose_name = "امکانات اتاق"
-        verbose_name_plural = "امکانات اتاق"
+        verbose_name_plural = "3. امکانات اتاق"
         
 class RecreationalFacilities(models.Model):
     name = models.CharField(max_length=200, verbose_name="نام")
@@ -32,7 +32,7 @@ class RecreationalFacilities(models.Model):
         return self.name
     class Meta:
         verbose_name = "امکانات تفریحی"
-        verbose_name_plural = "امکانات تفریحی"
+        verbose_name_plural = "4. امکانات تفریحی"
         
 class SportFacilities(models.Model):
     name = models.CharField(max_length=200, verbose_name="نام")
@@ -42,7 +42,7 @@ class SportFacilities(models.Model):
         return self.name
     class Meta:
         verbose_name = "امکانات ورزشی"
-        verbose_name_plural = "امکانات ورزشی"
+        verbose_name_plural = "5. امکانات ورزشی"
         
 class HotelImage(models.Model):
     hotel = models.ForeignKey('Hotel', on_delete=models.CASCADE, related_name='hotel_images', verbose_name="هتل")
@@ -79,7 +79,7 @@ class Hotel(models.Model):
     
     class Meta:
         verbose_name = "هتل"
-        verbose_name_plural = "هتل ها"
+        verbose_name_plural = "1. هتل ها"
         
 class HotelPrice(models.Model):
     hotels = models.ManyToManyField(Hotel, related_name='hotel_prices', verbose_name="هتل")
