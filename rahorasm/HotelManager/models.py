@@ -75,7 +75,7 @@ class Hotel(models.Model):
     edited_at = jmodels.jDateTimeField(auto_now=True, verbose_name="تاریخ ویرایش")
     
     def __str__(self):
-        return self.name
+        return f"{self.name} ({self.city.name})"
     
     class Meta:
         verbose_name = "هتل"
@@ -87,17 +87,19 @@ class HotelPrice(models.Model):
     one_bed_price = models.DecimalField(max_digits=20, decimal_places=2, verbose_name="قیمت یک تخته")
     child_with_bed_price = models.DecimalField(max_digits=20, decimal_places=2, verbose_name="قیمت کودک با تخت")
     child_no_bed_price = models.DecimalField(max_digits=20, decimal_places=2, verbose_name="قیمت کودک بدون تخت")
+    baby_price = models.DecimalField(max_digits=20, decimal_places=2, verbose_name="قیمت نوزاد")
     other_currency = models.CharField(choices=[('EUR', 'یورو'), ('USD', 'دلار')], max_length=10, null=True, blank=True, verbose_name="ارز دیگر")
     two_bed_price_other_currency = models.DecimalField(max_digits=20, decimal_places=2, null=True, blank=True, verbose_name="قیمت دو تخته در ارز دیگر")
     one_bed_price_other_currency = models.DecimalField(max_digits=20, decimal_places=2, null=True, blank=True, verbose_name="قیمت یک تخته در ارز دیگر")
     child_with_bed_price_other_currency = models.DecimalField(max_digits=20, decimal_places=2, null=True, blank=True, verbose_name="قیمت کودک با تخت در ارز دیگر")
     child_no_bed_price_other_currency = models.DecimalField(max_digits=20, decimal_places=2, null=True, blank=True, verbose_name="قیمت کودک بدون تخت در ارز دیگر")
+    baby_price_other_currency = models.DecimalField(max_digits=20, decimal_places=2, null=True, blank=True, verbose_name="قیمت نوزاد در ارز دیگر")
     
     created_at = jmodels.jDateTimeField(auto_now_add=True, verbose_name="تاریخ ایجاد")
     edited_at = jmodels.jDateTimeField(auto_now=True, verbose_name="تاریخ ویرایش")
 
     def __str__(self):
-        return ", ".join([i.name for i in self.hotels.all()]) + " با قیمت 2 تخته " + str(self.two_bed_price) + " تومان"
+        return ", ".join([f"{i.name} ({i.city.name})" for i in self.hotels.all()]) + " با قیمت 2 تخته " + str(self.two_bed_price) + " تومان"
 
     class Meta:
         verbose_name = "قیمت هتل"
