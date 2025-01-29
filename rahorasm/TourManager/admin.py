@@ -45,6 +45,11 @@ class FlightLegsInline(admin.TabularInline):
     verbose_name = "پرواز"
     verbose_name_plural = "پرواز ها"
 class FlightTimesAdmin(admin.ModelAdmin):
+    def get_model_perms(self, request):
+        """
+        Return empty perms dict thus hiding the model from admin index.
+        """
+        return {}
     search_fields = ['departure_time']
     inlines = [FlightLegsInline, HotelPriceInline]
     exclude = ('hotel_price', 'flight_Legs')
@@ -56,20 +61,25 @@ class FlightTimesInline(admin.TabularInline):  # or use StackedInline if you pre
     extra = 1  # Number of empty forms to show for adding new relations
     verbose_name = "تاریخ پرواز"  # Custom name for the inline
     verbose_name_plural = "تاریخ های پرواز"
-    
+    save_as = True
     
 @admin.register(Tour)
 class TourAdmin(admin.ModelAdmin):
     autocomplete_fields = ['destinations']
-    list_display = ('title', 'tour_type', 'is_featured', 'created_at')
+    list_display = ('title', 'tour_type', 'is_featured', 'tour_duration')
     search_fields = ('title', 'description_editor')
-    list_filter = ('tour_type', 'is_featured')
+    list_filter = ('tour_type', 'is_featured', 'is_shown')
     exclude = ('flight_times',)
     inlines = [FlightTimesInline]
     
     
 @admin.register(FlightLeg)
 class FlightLegAdmin(admin.ModelAdmin):
+    def get_model_perms(self, request):
+        """
+        Return empty perms dict thus hiding the model from admin index.
+        """
+        return {}
     autocomplete_fields = ['airline', 'departure_airport', 'arrival_airport']
     list_display = ('airline', 'departure_airport', 'arrival_airport')
     search_fields = ('departure_airport__name', 'arrival_airport__name')
