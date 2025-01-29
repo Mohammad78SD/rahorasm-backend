@@ -7,6 +7,7 @@ class PostList(generics.ListAPIView):
 
     def get_queryset(self):
         queryset = Post.objects.all()
+        queryset = queryset.filter(published = True)
         category = self.request.query_params.get('category', None)
         if category is not None:
             queryset = queryset.filter(category=category)
