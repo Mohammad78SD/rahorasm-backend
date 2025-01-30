@@ -62,7 +62,50 @@ class FlightTimesInline(admin.TabularInline):  # or use StackedInline if you pre
     verbose_name = "تاریخ پرواز"  # Custom name for the inline
     verbose_name_plural = "تاریخ های پرواز"
     save_as = True
-    
+
+
+@admin.action(description="کپی کردن تور ها")
+def duplicate_tour(modeladmin, request, queryset):
+    for object in queryset:
+        # Duplicate the object but set ID to None (so it creates a new instance)
+        old_destinations = object.destinations.all()
+        old_flight_times = object.flight_times.all()
+        object.id = None
+        object.pk = None  # Ensure the object is treated as new
+        object.save()
+        
+        object.destinations.set(old_destinations)
+        
+        new_flight_times= []
+        for flight_time in old_flight_times:
+            old_flight_legs = flight_time.flight_Legs.all()
+            old_hotel_prices = flight_time.hotel_price.all()
+            flight_time.id = None
+            flight_time.pk = None
+            flight_time.save()
+            new_flight_legs = []
+            for flight_leg in old_flight_legs:
+                flight_leg.id = None
+                flight_leg.pk = None
+                flight_leg.save()
+                new_flight_legs.append(flight_leg)
+            flight_time.flight_Legs.set(new_flight_legs)
+            new_hotel_prices = []
+            for hotel_price in old_hotel_prices:
+                old_hotels = hotel_price.hotels.all()
+                hotel_price.id = None
+                hotel_price.pk = None
+                hotel_price.save()
+                hotel_price.hotels.set(old_hotels)
+                new_hotel_prices.append(hotel_price)
+            flight_time.hotel_price.set(new_hotel_prices)
+            new_flight_times.append(flight_time)
+                
+        object.flight_times.set(new_flight_times)
+        object.update_prices()
+        object.save()
+        
+duplicate_tour.short_description = "کپی کردن تور ها"
 @admin.register(Tour)
 class TourAdmin(admin.ModelAdmin):
     autocomplete_fields = ['destinations']
@@ -71,6 +114,7 @@ class TourAdmin(admin.ModelAdmin):
     list_filter = ('tour_type', 'is_featured', 'is_shown')
     exclude = ('flight_times','least_price', 'max_price')
     inlines = [FlightTimesInline]
+    actions = [duplicate_tour]
     
     
 @admin.register(FlightLeg)
