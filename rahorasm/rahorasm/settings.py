@@ -179,6 +179,7 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')  # Adjust the path as needed
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, "static"),
 ]
+CKEDITOR_5_ALLOW_ALL_FILE_TYPES = True
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
