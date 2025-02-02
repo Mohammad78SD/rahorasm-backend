@@ -75,18 +75,25 @@ class Airport(models.Model):
         
         
 class FlightLeg(models.Model):
+    leg_type = models.CharField(max_length=50, choices=[('Departure', 'پرواز رفت'), ('ِContinueDeparture', 'ادامه پرواز رفت'), ('Arrival', 'پرواز برگشت'), ('ContinueArrival', 'ادامه پرواز برگشت')], verbose_name="نوع پرواز", default='Departure')
+    flight_length = models.DurationField(verbose_name="مدت پرواز", null=True, blank=True)
     airline = models.ForeignKey(AirLine, on_delete=models.PROTECT, related_name='flight_legs', verbose_name="هواپیمایی")
     departure_airport = models.ForeignKey(Airport, on_delete=models.PROTECT, related_name='departure_legs', verbose_name="فرودگاه مبدا")
     arrival_airport = models.ForeignKey(Airport, on_delete=models.PROTECT, related_name='arrival_legs', verbose_name="فرودگاه مقصد")
     departure_time = jmodels.jDateTimeField(verbose_name="زمان پرواز")
     arrival_time = jmodels.jDateTimeField(verbose_name="زمان فرود")
+    stop_time = models.DurationField(verbose_name="زمان توقف", null=True, blank=True)
     travel_class = models.CharField(max_length=50, choices=[('Economy', 'Economy'), ('Business', 'Business'), ('First', 'First')], verbose_name="کلاس سفر")
     class Meta:
         verbose_name = "پرواز"
         verbose_name_plural = "پرواز ها"
     def __str__(self):
         return self.airline.name + ' از ' + self.departure_airport.name + ' به ' + self.arrival_airport.name + ' در تاریخ ' + self.departure_time.strftime('%Y/%m/%d ساعت %H:%M') + ' تا ' + self.arrival_time.strftime('%Y/%m/%d ساعت %H:%M')
-    
+    def save(self, *args, **kwargs):
+        if self.leg_type == 'Departure' or self.leg_type == 'Arrival':
+            self.flight_length = None
+        super().save(*args, **kwargs)
+        
 from HotelManager.models import HotelPrice
 class FlightTimes(models.Model):
     departure_date = jmodels.jDateTimeField(verbose_name="تاریخ رفت")
