@@ -28,6 +28,7 @@ from .filters import (
     TourFilter,
 )
 from rest_framework.filters import OrderingFilter
+from django.db.models import Count
 from HotelManager.models import Hotel
 from HotelManager.serializers import HotelSerializer
 from blog.models import Category
@@ -282,8 +283,14 @@ class NavbarAPIView(APIView):
         visas = Visa.objects.all()
         visa_data = VisaSerializer(visas, many=True).data
         
-        
-        
+        multi_destinations = Tour.objects.annotate(num_destinations=Count('destinations')).filter(num_destinations__gt=1)
+        multi_destinations_data = TourSerializer(multi_destinations, many=True).data
+        multi_destination_countries = []
+        for tour in multi_destinations_data:
+            for destination in tour['destinations']:
+                if destination['country']['name'] not in multi_destination_countries:
+                    multi_destination_countries.append(destination['country']['name'])
+        print(multi_destination_countries)
         navbar = []
         for continent in continent_data:
             if continent['is_shown'] == True:
@@ -294,6 +301,13 @@ class NavbarAPIView(APIView):
                     "children": []
                 }
                 for country in continent.get('countries', []):
+                    if country['name'] in multi_destination_countries:
+                        multi_entry = {
+                            "id": country['id'],
+                            "name": f"تور های ترکیبی {country['name']}",
+                            "path": f"/tour/tours?country={country['name']}&multi=true"
+                        }
+                        continent_entry["children"].insert(0, multi_entry)
                     if country['is_shown'] == True:
                         country_entry = {
                             "id": country['id'],
