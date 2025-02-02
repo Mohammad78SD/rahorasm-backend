@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from .models import ContactDetail, AboutDetail
 from rest_framework import serializers
-from .models import FooterBody, FooterColumn, FooterContact
+from .models import FooterBody, FooterColumn, FooterContact, MainPagePDF
 
 class FooterBodySerializer(serializers.ModelSerializer):
     class Meta:
@@ -33,4 +33,9 @@ class ContactSerializer(serializers.ModelSerializer):
 class AboutSerializer(serializers.ModelSerializer):
     class Meta:
         model = AboutDetail
+        fields = '__all__'
+        
+class MainPagePDFSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = MainPagePDF
         fields = '__all__'

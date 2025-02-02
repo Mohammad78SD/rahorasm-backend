@@ -55,7 +55,7 @@ class ContactDetail(models.Model):
         ('material-symbols-light:phone-enabled', 'آیکن تلفن'),
         ('material-symbols-light:alarm-rounded', 'آیکن ساعت'),
     ]
-
+    sort = models.IntegerField(default=0, verbose_name="ترتیب نمایش")
     icon = models.CharField(max_length=50, choices=ICON_CHOICES, verbose_name="آیکن")
     title = models.CharField(max_length=100, verbose_name="عنوان")
     desc = models.TextField(verbose_name="توضیحات")
@@ -75,7 +75,7 @@ class AboutDetail(models.Model):
         ('material-symbols-light:id-card', 'آیکن پاسپورت'),
         ('material-symbols-light:account-box', 'آیکن مشتری'),
     ]
-
+    sort = models.IntegerField(default=0, verbose_name="ترتیب نمایش")
     icon = models.CharField(max_length=50, choices=ICON_CHOICES, verbose_name="آیکن")
     title = models.CharField(max_length=100, verbose_name="عنوان")
     desc = models.TextField(verbose_name="توضیحات")
@@ -86,3 +86,12 @@ class AboutDetail(models.Model):
     class Meta:
         verbose_name = "اطلاعات درباره ما"
         verbose_name_plural = "اطلاعات درباره ما"
+        
+class MainPagePDF(models.Model):
+    title = models.CharField(max_length=100, verbose_name="عنوان")
+    pdf = models.FileField(upload_to='main_page_pdfs/', verbose_name="فایل")
+    def __str__(self):
+        return self.title
+    class Meta:
+        verbose_name = "پی دی اف صفحه اصلی"
+        verbose_name_plural = "پی دی اف های صفحه اصلی"

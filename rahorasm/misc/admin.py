@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import ContactDetail, AboutDetail, FooterBody, FooterColumn, FooterContact
+from .models import ContactDetail, AboutDetail, FooterBody, FooterColumn, FooterContact, MainPagePDF
 
 # You need to import this for adding jalali calendar widget
 import django_jalali.admin as jadmin
@@ -17,5 +17,20 @@ class AboutDetailAdmin(admin.ModelAdmin):
     
 admin.site.register(FooterBody)
 admin.site.register(FooterColumn)
-admin.site.register(FooterContact)
-    
+class FooterContactAdmin(admin.ModelAdmin):
+  def has_add_permission(self, request):
+    num_objects = self.model.objects.count()
+    if num_objects >= 1:
+      return False
+    else:
+      return True
+admin.site.register(FooterContact, FooterContactAdmin)
+
+class PDFAdmin(admin.ModelAdmin):
+  def has_add_permission(self, request):
+    num_objects = self.model.objects.count()
+    if num_objects >= 1:
+      return False
+    else:
+      return True
+admin.site.register(MainPagePDF, PDFAdmin)
