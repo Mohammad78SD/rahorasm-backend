@@ -301,13 +301,7 @@ class NavbarAPIView(APIView):
                     "children": []
                 }
                 for country in continent.get('countries', []):
-                    if country['name'] in multi_destination_countries:
-                        multi_entry = {
-                            "id": country['id'],
-                            "name": f"تور های ترکیبی {country['name']}",
-                            "path": f"/tour/tours?country={country['name']}&multi=true"
-                        }
-                        continent_entry["children"].insert(0, multi_entry)
+                    
                     if country['is_shown'] == True:
                         country_entry = {
                             "id": country['id'],
@@ -315,6 +309,13 @@ class NavbarAPIView(APIView):
                             "path": f"/tour/tours?country={country['name']}",
                             "children": []
                         }
+                        if country['name'] in multi_destination_countries:
+                            multi_entry = {
+                                "id": country['id'],
+                                "name": f"تور های ترکیبی {country['name']}",
+                                "path": f"/tour/tours?country={country['name']}&multi=true"
+                            }
+                            country_entry["children"].insert(0, multi_entry)
                         for city in country.get('cities', []):
                             if city['is_shown'] == True:
                                 city_entry = {
