@@ -75,6 +75,7 @@ class TourListView(generics.ListAPIView):
         continent_name = self.request.query_params.get('continent', None)
         
         is_featured = self.request.query_params.get('is_featured', None)
+        is_multi = self.request.query_params.get('multi', None)
         
 
         if city_name:
@@ -86,6 +87,9 @@ class TourListView(generics.ListAPIView):
             
         if is_featured:
             queryset = queryset.filter(is_featured=True)
+            
+        if is_multi:
+            queryset = queryset.annotate(num_destinations=Count('destinations')).filter(num_destinations__gt=1)
             
             
         duration = self.request.query_params.get('duration', None)
@@ -133,6 +137,7 @@ def list(self, request, *args, **kwargs):
     least_price = request.query_params.get('least_price', None)
     
     response_data = []
+    
     
     for tour in queryset:
         # Start with all flights for this tour
