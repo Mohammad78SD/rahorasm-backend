@@ -7,6 +7,8 @@ from django.db.models import Min, Max
     
 class Continent(models.Model):
     name = models.CharField(max_length=200, verbose_name="نام قاره")
+    sort = models.IntegerField(default=0, verbose_name="ترتیب نمایش")
+    is_shown = models.BooleanField(default=True, verbose_name="آیا در منو نمایش داده شود؟")
     created_at = jmodels.jDateTimeField(auto_now_add=True)
     edited_at = jmodels.jDateTimeField(auto_now=True)
     def __str__(self):
@@ -18,6 +20,8 @@ class Continent(models.Model):
 class Country(models.Model):
     name = models.CharField(max_length=200, verbose_name="نام کشور")
     continent = models.ForeignKey(Continent, on_delete=models.PROTECT, related_name='countries', verbose_name="قاره")
+    sort = models.IntegerField(default=0, verbose_name="ترتیب نمایش")
+    is_shown = models.BooleanField(default=True, verbose_name="آیا در منو نمایش داده شود؟")
     created_at = jmodels.jDateTimeField(auto_now_add=True)
     edited_at = jmodels.jDateTimeField(auto_now=True)
     def __str__(self):
@@ -29,6 +33,8 @@ class Country(models.Model):
 class City(models.Model):
     name = models.CharField(max_length=200, verbose_name="نام شهر")
     country = models.ForeignKey(Country, on_delete=models.PROTECT, related_name='cities', verbose_name="کشور")
+    sort = models.IntegerField(default=0, verbose_name="ترتیب نمایش")
+    is_shown = models.BooleanField(default=True, verbose_name="آیا در منو نمایش داده شود؟")
     created_at = jmodels.jDateTimeField(auto_now_add=True)
     edited_at = jmodels.jDateTimeField(auto_now=True)
     def __str__(self):
