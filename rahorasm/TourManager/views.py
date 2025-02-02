@@ -90,7 +90,7 @@ class TourListView(generics.ListAPIView):
             
         if is_multi:
             queryset = queryset.annotate(num_destinations=Count('destinations', distinct=True)).filter(num_destinations__gt=1)
-            
+            print(queryset)
             
         duration = self.request.query_params.get('duration', None)
         if duration:
