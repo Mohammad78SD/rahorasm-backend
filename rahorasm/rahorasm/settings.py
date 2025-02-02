@@ -199,7 +199,7 @@ AUTH_USER_MODEL = 'UserManager.UserModel'
 
 
 
-MEDIA_URL = '/media/'
+MEDIA_URL = 'https://rahorasm.msdcorporation.top/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 customColorPalette = [
@@ -294,8 +294,8 @@ CKEDITOR_5_CONFIGS = {
 
 # Define a constant in settings.py to specify file upload permissions
 CKEDITOR_5_FILE_UPLOAD_PERMISSION = "staff"  # Possible values: "staff", "authenticated", "any"\
-CKEDITOR_ALLOWED_IMAGE_EXTENSIONS = ['jpg', 'jpeg', 'png', 'gif', 'webp']
 CKEDITOR_5_ALLOW_ALL_FILE_TYPES = True
+CKEDITOR_ALLOWED_IMAGE_EXTENSIONS = ['jpg', 'jpeg', 'png', 'gif', 'webp']
 
     
     
