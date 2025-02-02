@@ -199,7 +199,7 @@ AUTH_USER_MODEL = 'UserManager.UserModel'
 
 
 
-MEDIA_URL = 'https://rahorasm.msdcorporation.top/media/'
+MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 customColorPalette = [
