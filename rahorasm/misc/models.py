@@ -5,6 +5,7 @@ from django.core.exceptions import ValidationError
 class FooterBody(models.Model):
     title = models.CharField(max_length=100, verbose_name="متن لینک")
     link = models.CharField(max_length=100, verbose_name="لینک")
+    sort = models.IntegerField(default=0, verbose_name="ترتیب نمایش")
     def __str__(self):
         return self.title
     class Meta:
@@ -14,6 +15,7 @@ class FooterBody(models.Model):
 class FooterColumn(models.Model):
     title = models.CharField(max_length=100, verbose_name="عنوان ستون")
     body = models.ManyToManyField(FooterBody, verbose_name="بدنه ستون")
+    sort = models.IntegerField(default=0, verbose_name="ترتیب نمایش")
     def __str__(self):
         return self.title
     class Meta:
