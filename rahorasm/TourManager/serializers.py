@@ -96,7 +96,11 @@ class FlightTimeSerializer(serializers.ModelSerializer):
     departure_date = serializers.SerializerMethodField()
     arrival_date = serializers.SerializerMethodField()
     flight_Legs = FlightLegSerializer(many=True, read_only=True)
-    hotel_price = HotelPriceSerializer(many=True, read_only=True)
+    hotel_price = serializers.SerializerMethodField()
+
+    def get_hotel_price(self, obj):
+        hotel_prices = obj.hotel_price.all().order_by('two_bed_price')
+        return HotelPriceSerializer(hotel_prices, many=True).data
     least_price = serializers.SerializerMethodField()
     
     
