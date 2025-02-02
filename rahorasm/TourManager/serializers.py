@@ -51,8 +51,7 @@ class FlightLegSerializer(serializers.ModelSerializer):
     arrival_airport = AirportSerializer()
     departure = serializers.SerializerMethodField()
     arrival = serializers.SerializerMethodField()
-    
-    
+
     # destination_airport = AirportSerializer()
     # return_origin_airport = AirportSerializer()
     # return_destination_airport = AirportSerializer()
@@ -177,15 +176,19 @@ class NavbarCitySerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class NavbarCountrySerializer(serializers.ModelSerializer):
-    cities = NavbarCitySerializer(many=True)  # Include cities
-
+    cities = serializers.SerializerMethodField()
+    def get_cities(self, obj):
+        cities = obj.cities.all().order_by('sort')
+        return NavbarCitySerializer(cities, many=True).data
     class Meta:
         model = Country
         fields = '__all__'
 
 class NavbarContinentSerializer(serializers.ModelSerializer):
-    countries = NavbarCountrySerializer(many=True)  # Include countries
-
+    countries = serializers.SerializerMethodField()
+    def get_countries(self, obj):
+        countries = obj.countries.all().order_by('sort')
+        return NavbarCountrySerializer(countries, many=True).data
     class Meta:
         model = Continent
         fields = '__all__'
