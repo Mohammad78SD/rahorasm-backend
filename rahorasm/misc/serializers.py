@@ -9,7 +9,10 @@ class FooterBodySerializer(serializers.ModelSerializer):
         fields = ['title', 'link']
 
 class FooterColumnSerializer(serializers.ModelSerializer):
-    body = FooterBodySerializer(many=True, read_only=True)
+    body = serializers.SerializerMethodField()
+    def get_body(self,obj):
+        body = obj.body.all().order_by('sort')
+        return FooterBodySerializer(body,many = True).data
     
     class Meta:
         model = FooterColumn
