@@ -72,6 +72,7 @@ def duplicate_tour(modeladmin, request, queryset):
         old_flight_times = object.flight_times.all()
         object.id = None
         object.pk = None  # Ensure the object is treated as new
+        object.is_shown = False
         object.save()
         
         object.destinations.set(old_destinations)
@@ -109,8 +110,17 @@ duplicate_tour.short_description = "کپی کردن تور ها"
 @admin.register(Tour)
 class TourAdmin(admin.ModelAdmin):
     autocomplete_fields = ['destinations']
-    list_display = ('title', 'tour_type', 'is_featured', 'tour_duration')
+    list_display = ('title', 'get_airline', 'is_featured', 'tour_duration', 'occasion')
     search_fields = ('title', 'description_editor')
+
+    def get_airline(self, obj):
+        first_flight = obj.flight_times.first()
+        if first_flight:
+            first_leg = first_flight.flight_Legs.first()
+            if first_leg:
+                return first_leg.airline.name
+        return None
+    get_airline.short_description = 'ایرلاین'
     list_filter = ('tour_type', 'is_featured', 'is_shown')
     exclude = ('flight_times','least_price', 'max_price')
     inlines = [FlightTimesInline]
