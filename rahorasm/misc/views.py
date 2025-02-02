@@ -7,11 +7,11 @@ from .serializers import (FooterBodySerializer, FooterColumnSerializer,
                         FooterContactSerializer, ContactSerializer, AboutSerializer)
 
 class ContactDetailList(generics.ListAPIView):
-    queryset = ContactDetail.objects.all()
+    queryset = ContactDetail.objects.all().order_by('sort')
     serializer_class = ContactSerializer
     
 class AboutDetailList(generics.ListAPIView):
-    queryset = AboutDetail.objects.all()
+    queryset = AboutDetail.objects.all().order_by('sort')
     serializer_class = AboutSerializer
 
 @api_view(['GET'])
