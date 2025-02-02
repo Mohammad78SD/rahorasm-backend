@@ -17,7 +17,7 @@ class AboutDetailList(generics.ListAPIView):
 @api_view(['GET'])
 def footer_data(request):
     
-    columns = FooterColumn.objects.all()
+    columns = FooterColumn.objects.all().order_by('sort')
     contact = FooterContact.objects.first()
     
     data = {
