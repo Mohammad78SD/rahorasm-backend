@@ -275,7 +275,7 @@ class Filters(APIView):
 class NavbarAPIView(APIView):
     def get(self, request):
         # Correctly prefetch related countries and cities
-        continents = Continent.objects.prefetch_related('countries__cities').all()
+        continents = Continent.objects.prefetch_related('countries__cities').all().order_by("sort")
         continent_data = NavbarContinentSerializer(continents, many=True).data
         blog_categories = Category.objects.all()
 
@@ -286,30 +286,33 @@ class NavbarAPIView(APIView):
         
         navbar = []
         for continent in continent_data:
-            continent_entry = {
-                "id": continent['id'],
-                "name": f"تور {continent['name']}",
-                "path": f"/tour/tours?continent={continent['name']}",
-                "children": []
-            }
-            for country in continent.get('countries', []):
-                country_entry = {
-                    "id": country['id'],
-                    "name": country['name'],
-                    "path": f"/tour/tours?country={country['name']}",
+            if continent['is_shown'] == True:
+                continent_entry = {
+                    "id": continent['id'],
+                    "name": f"تور {continent['name']}",
+                    "path": f"/tour/tours?continent={continent['name']}",
                     "children": []
                 }
-                for city in country.get('cities', []):
-                    city_entry = {
-                        "id": city['id'],
-                        "name": city['name'],
-                        "path": f"/tour/tours?city={city['name']}"
-                    }
-                    country_entry["children"].append(city_entry)
+                for country in continent.get('countries', []):
+                    if country['is_shown'] == True:
+                        country_entry = {
+                            "id": country['id'],
+                            "name": country['name'],
+                            "path": f"/tour/tours?country={country['name']}",
+                            "children": []
+                        }
+                        for city in country.get('cities', []):
+                            if city['is_shown'] == True:
+                                city_entry = {
+                                    "id": city['id'],
+                                    "name": city['name'],
+                                    "path": f"/tour/tours?city={city['name']}"
+                                }
+                                country_entry["children"].append(city_entry)
 
-                continent_entry["children"].append(country_entry)
+                        continent_entry["children"].append(country_entry)
 
-            navbar.append(continent_entry)
+                navbar.append(continent_entry)
             
         visa_entry={
             "name": "ویزا",
@@ -372,7 +375,8 @@ class NavbarAPIView(APIView):
         navbar.append(contact)
         return Response(navbar)
     
-    
+from misc.models import MainPagePDF
+from misc.serializers import MainPagePDFSerializer
 class Home(APIView):
     def get(self, request):
         featured_tours = Tour.objects.all().filter(is_featured=True).order_by('-created_at')[:10]
@@ -387,9 +391,13 @@ class Home(APIView):
         featured_hotels = Hotel.objects.all().filter(is_featured=True).order_by('-created_at')[:10]
         featured_hotels_serializer = HotelSerializer(featured_hotels, many=True, context={'request': request})
         
+        main_page_pdf = MainPagePDF.objects.all()
+        main_page_pdf_serializer = MainPagePDFSerializer(main_page_pdf, many=True, context={'request': request})
+        
         return Response({
             "featured_tours": featured_tours_serializer.data,
             "latest_asia_tours": latest_tours_serializer.data,
             "latest_europe_tours": latest_europe_tours_serializer.data,
-            "featured_hotels": featured_hotels_serializer.data
+            "featured_hotels": featured_hotels_serializer.data,
+            'pdf':main_page_pdf_serializer.data
         })
