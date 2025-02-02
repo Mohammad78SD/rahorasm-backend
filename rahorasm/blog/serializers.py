@@ -16,15 +16,19 @@ class UserSerializer(serializers.ModelSerializer):
         
 class CommentSerializer(serializers.ModelSerializer):
     author = serializers.ReadOnlyField(source='author.name')
-    post = serializers.PrimaryKeyRelatedField(read_only=True) 
+    post = serializers.PrimaryKeyRelatedField(read_only=True)
+    
     class Meta:
         model = Comment
         fields = '__all__'
         
 class PostSerializer(serializers.ModelSerializer):
-    
+    created_at = serializers.SerializerMethodField()
     category = CategorySerializer(many=True)
     author = UserSerializer()
+    def get_created_at(self, obj):
+        jdate = obj.created_at
+        return jdate.togregorian()
     class Meta:
         model = Post
         fields = '__all__'
