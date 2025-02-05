@@ -122,7 +122,7 @@ class TourAdmin(admin.ModelAdmin):
         return None
     get_airline.short_description = 'ایرلاین'
     list_filter = ('tour_type', 'is_featured', 'is_shown')
-    exclude = ('flight_times','least_price', 'max_price')
+    exclude = ('flight_times','least_price', 'max_price', 'least_price_currency', 'max_price_currency', 'other_currency')
     inlines = [FlightTimesInline]
     actions = [duplicate_tour]
     

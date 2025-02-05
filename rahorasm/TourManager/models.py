@@ -124,6 +124,9 @@ class Tour(models.Model):
     is_shown = models.BooleanField(default=True, verbose_name="آیا اعتبار دارد؟")
     least_price = models.DecimalField(max_digits=20, decimal_places=2, null=True, blank=True, verbose_name="کمترین قیمت تور")
     max_price = models.DecimalField(max_digits=20, decimal_places=2, null=True, blank=True, verbose_name="بیشترین قیمت تور")
+    least_price_currency = models.DecimalField(max_digits=20, decimal_places=2, null=True, blank=True, verbose_name="نرخ ارزی کمترین قیمت تور")
+    max_price_currency = models.DecimalField(max_digits=20, decimal_places=2, null=True, blank=True, verbose_name="نرخ ارزی بیشترین قیمت تور")
+    other_currency = models.CharField(max_length=200, verbose_name="ارز دیگر", null=True, blank=True)
 
     flight_times = models.ManyToManyField(FlightTimes, related_name='tour_flights', verbose_name="زمان پرواز", null=True, blank=True)
     
@@ -140,18 +143,27 @@ class Tour(models.Model):
         # Calculate least price
         if hotel_prices.exists():
             # Get min and max two_bed_price from hotel_prices
-            min_price = hotel_prices.aggregate(models.Min('two_bed_price'))['two_bed_price__min']
-            max_price = hotel_prices.aggregate(models.Max('two_bed_price'))['two_bed_price__max']
+            min_price_data = hotel_prices.order_by('two_bed_price').first()
+            max_price_data = hotel_prices.order_by('-two_bed_price').first()
+            
+            min_price = min_price_data.two_bed_price
+            least_price_currency = min_price_data.two_bed_price_other_currency
+            max_price = max_price_data.two_bed_price
+            max_price_currency = max_price_data.two_bed_price_other_currency
+            currency = min_price_data.other_currency
             
             # Set the tour's prices
             self.least_price = min_price
+            self.least_price_currency = least_price_currency
             self.max_price = max_price
+            self.max_price_currency = max_price_currency
+            self.other_currency = currency
         else:
             # If no hotel prices found, you can set default values or leave as None
             self.least_price = 0.0
             self.max_price = 0.0
         # Save the updated prices
-        super().save(update_fields=['least_price', 'max_price'])
+        super().save(update_fields=['least_price', 'max_price', 'least_price_currency', 'max_price_currency', 'other_currency'])
         
     def __str__(self):
         return self.title
