@@ -76,6 +76,7 @@ class TourListView(generics.ListAPIView):
         
         is_featured = self.request.query_params.get('is_featured', None)
         is_multi = self.request.query_params.get('multi', None)
+        occasion = self.request.query_params.get('occasion', None)
 
         if is_multi:
             queryset = queryset.annotate(
@@ -83,6 +84,9 @@ class TourListView(generics.ListAPIView):
             ).filter(
                 num_destinations__gt=1
             )
+            
+        if occasion:
+            queryset = queryset.filter(occasion=occasion)
 
         if city_name:
             queryset = queryset.filter(destinations__name=city_name)
