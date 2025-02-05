@@ -323,7 +323,7 @@ class NavbarAPIView(APIView):
                     "children": []
                 }
                 for country in continent.get('countries', []):
-                    
+                    multi_entry = {}
                     if country['is_shown'] == True:
                         country_entry = {
                             "id": country['id'],
