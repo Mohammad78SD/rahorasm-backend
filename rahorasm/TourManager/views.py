@@ -298,8 +298,22 @@ class NavbarAPIView(APIView):
             for destination in tour['destinations']:
                 if destination['country']['name'] not in multi_destination_countries:
                     multi_destination_countries.append(destination['country']['name'])
-        print(multi_destination_countries)
+        
+        occasions = Tour.objects.values('occasion').exclude(occasion__isnull=True).distinct()
+        print(occasions)
+        
         navbar = []
+        occasions_links = {
+            "name": "تور های مناسبتی",
+            "children": []
+        }
+        for occasion in occasions:
+            occasion_entry = {
+                "name": occasion['occasion'],
+                "path": f"/tour/tours?occasion={occasion['occasion']}"
+            }
+            occasions_links["children"].append(occasion_entry)
+        navbar.append(occasions_links)
         for continent in continent_data:
             if continent['is_shown'] == True:
                 continent_entry = {
@@ -323,7 +337,6 @@ class NavbarAPIView(APIView):
                                 "name": f"تور های ترکیبی {country['name']}",
                                 "path": f"/tour/tours?country={country['name']}&multi=true"
                             }
-                            country_entry["children"].insert(0, multi_entry)
                         for city in country.get('cities', []):
                             if city['is_shown'] == True:
                                 city_entry = {
@@ -333,6 +346,7 @@ class NavbarAPIView(APIView):
                                 }
                                 country_entry["children"].append(city_entry)
 
+                        country_entry["children"].append(multi_entry)
                         continent_entry["children"].append(country_entry)
 
                 navbar.append(continent_entry)
