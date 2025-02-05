@@ -345,8 +345,8 @@ class NavbarAPIView(APIView):
                                     "path": f"/tour/tours?city={city['name']}"
                                 }
                                 country_entry["children"].append(city_entry)
-
-                        country_entry["children"].append(multi_entry)
+                        if multi_entry:
+                            country_entry["children"].append(multi_entry)
                         continent_entry["children"].append(country_entry)
 
                 navbar.append(continent_entry)
