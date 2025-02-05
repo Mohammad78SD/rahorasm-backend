@@ -38,6 +38,7 @@ class HotelPriceInline(admin.TabularInline):
     autocomplete_fields = ['hotelprice']
     verbose_name = "قیمت هتل"
     verbose_name_plural = "قیمت هتل ها"
+    ordering = ['hotelprice__two_bed_price']
 class FlightLegsInline(admin.TabularInline):
     model = FlightTimes.flight_Legs.through
     extra = 1
