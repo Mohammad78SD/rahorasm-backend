@@ -102,7 +102,7 @@ class FlightTimeSerializer(serializers.ModelSerializer):
         return HotelPriceSerializer(hotel_prices, many=True).data
     least_price = serializers.SerializerMethodField()
     least_price_currency = serializers.SerializerMethodField()
-    currency = serializers.SerializerMethodField()
+    other_currency = serializers.SerializerMethodField()
     
     
     def get_least_price(self, obj):
