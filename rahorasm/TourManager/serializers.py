@@ -111,7 +111,7 @@ class FlightTimeSerializer(serializers.ModelSerializer):
     def get_least_price_currency(self, obj):
         return self.get_least_prices(obj)['least_price_other_currency']
     
-    def get_currency(self, obj):
+    def get_other_currency(self, obj):
         return self.get_least_prices(obj)['currency']
     
     def get_least_prices(self, obj):
