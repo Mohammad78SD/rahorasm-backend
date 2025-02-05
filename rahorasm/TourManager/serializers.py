@@ -101,20 +101,37 @@ class FlightTimeSerializer(serializers.ModelSerializer):
         hotel_prices = obj.hotel_price.all().order_by('two_bed_price')
         return HotelPriceSerializer(hotel_prices, many=True).data
     least_price = serializers.SerializerMethodField()
+    least_price_currency = serializers.SerializerMethodField()
+    currency = serializers.SerializerMethodField()
     
     
     def get_least_price(self, obj):
+        return self.get_least_prices(obj)['least_price']
+    
+    def get_least_price_currency(self, obj):
+        return self.get_least_prices(obj)['least_price_other_currency']
+    
+    def get_currency(self, obj):
+        return self.get_least_prices(obj)['currency']
+    
+    def get_least_prices(self, obj):
         prices = obj.hotel_price.all()  # Corrected the related name
         least_price = None  # Start with None to handle no prices
-
+        least_price_other_currency = None
+        currency = None
+        
         for price in prices:
             # Compare using the Decimal type
             if least_price is None or price.two_bed_price < least_price:
                 least_price = price.two_bed_price
-            if least_price is None or price.one_bed_price < least_price:
-                least_price = price.one_bed_price
+                least_price_other_currency = price.two_bed_price_other_currency
+                currency = price.other_currency
 
-        return least_price  # Returns None if no prices are found
+        return {
+            'least_price': least_price,
+            'least_price_other_currency': least_price_other_currency,
+            'currency': currency
+        }  # Returns None if no prices are found
     
     def get_departure_date(self, obj):
         jdate = obj.departure_date
