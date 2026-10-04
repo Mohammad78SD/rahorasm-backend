@@ -1,4 +1,6 @@
 from rest_framework import generics
+from rest_framework.generics import get_object_or_404
+from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from .models import Post,Comment
 from .serializers import PostSerializer, CommentSerializer
 
@@ -18,6 +20,7 @@ class PostDetail(generics.RetrieveAPIView):
     serializer_class = PostSerializer
     
 class CommentList(generics.ListCreateAPIView):
+    permission_classes = [IsAuthenticatedOrReadOnly]
     serializer_class = CommentSerializer
 
     def get_queryset(self):
@@ -26,6 +29,6 @@ class CommentList(generics.ListCreateAPIView):
 
     def perform_create(self, serializer):
         post_id = self.kwargs['post_id']
-        post = Post.objects.get(id=post_id)  # Get the post instance
+        post = get_object_or_404(Post, id=post_id)  # Get the post instance (404 if missing)
         serializer.save(author=self.request.user, post=post)  # Associate the comment with the post
         

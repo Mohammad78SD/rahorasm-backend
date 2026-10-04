@@ -10,9 +10,45 @@ from .models import UserModel as User, ContactForm
 from rest_framework.permissions import IsAuthenticated
 from django.contrib.auth.hashers import check_password
 from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework_simplejwt.views import TokenObtainPairView
+from django.conf import settings
+
+OTP_TTL = 300
 
 
-class LoginView(APIView):      
+def _tries_key(phone_number):
+    return f"otp_tries_{phone_number}"
+
+
+def reset_otp_tries(phone_number):
+    """Call whenever a fresh OTP is issued."""
+    cache.delete(_tries_key(phone_number))
+
+
+def otp_attempts_exhausted(phone_number):
+    return (cache.get(_tries_key(phone_number)) or 0) >= settings.MAX_OTP_TRY
+
+
+def register_failed_otp(phone_number):
+    """Count a wrong guess; once MAX_OTP_TRY is reached the pending OTP is discarded."""
+    key = _tries_key(phone_number)
+    cache.add(key, 0, OTP_TTL)
+    tries = cache.incr(key)
+    if tries >= settings.MAX_OTP_TRY:
+        cache.delete(f"otp_{phone_number}")
+    return tries
+
+
+TOO_MANY_TRIES = {"message": "تعداد تلاش های ناموفق بیش از حد مجاز است. لطفا کد جدید دریافت کنید."}
+
+
+class ThrottledTokenObtainPairView(TokenObtainPairView):
+    """SimpleJWT password login, throttled like /auth/login."""
+    throttle_scope = 'login'
+
+
+class LoginView(APIView):
+    throttle_scope = 'login'
     def post(self, request):
         serializer = LoginSerializer(data=request.data)
         if serializer.is_valid():
@@ -35,6 +71,7 @@ class LoginView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class LoginRequestOTPView(APIView):
+    throttle_scope = 'otp_request'
     def post(self, request):
         serializer = OTPRequestSerializer(data=request.data)
         if serializer.is_valid():
@@ -54,7 +91,8 @@ class LoginRequestOTPView(APIView):
             otp = str(random.randint(100000, 999999))
             
             # Store OTP in cache with 5 minutes expiration
-            cache.set(f"otp_{phone_number}", otp, 300)
+            cache.set(f"otp_{phone_number}", otp, OTP_TTL)
+            reset_otp_tries(phone_number)
             
             # Set cooldown
             cache.set(f"otp_cooldown_{phone_number}", True, 60)
@@ -65,12 +103,16 @@ class LoginRequestOTPView(APIView):
         return Response({'message': 'اطلاعات وارد شده صحیح نمی باشد'}, status=status.HTTP_400_BAD_REQUEST)
 
 class LoginValidateOTPView(APIView):
+    throttle_scope = 'otp_verify'
     def post(self, request):
         serializer = OTPValidateSerializer(data=request.data)
         if serializer.is_valid():
             phone_number = serializer.validated_data['phone_number']
             otp = serializer.validated_data['otp']
-            
+
+            if otp_attempts_exhausted(phone_number):
+                return Response(TOO_MANY_TRIES, status=status.HTTP_429_TOO_MANY_REQUESTS)
+
             stored_otp = cache.get(f"otp_{phone_number}")
             
             if stored_otp and stored_otp == otp:
@@ -89,10 +131,12 @@ class LoginValidateOTPView(APIView):
                     }, status=status.HTTP_200_OK)
                     
                 return Response({"error": "کاربری با این شماره تلفن وجود ندارد."}, status=status.HTTP_400_BAD_REQUEST)
+            register_failed_otp(phone_number)
             return Response({"error": "کد یکبار مصرف را اشتباه وارد کردید."}, status=status.HTTP_400_BAD_REQUEST)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class SignupRequestView(APIView):
+    throttle_scope = 'otp_request'
     def post(self, request):
         if not request.data:
             return Response({"message": "لطفا فیلد ها را تکمیل کنید."}, status=status.HTTP_400_BAD_REQUEST)
@@ -110,7 +154,8 @@ class SignupRequestView(APIView):
                 otp = str(random.randint(100000, 999999))
                 
                 # Store OTP in cache with 5 minutes expiration
-                cache.set(f"otp_{phone_number}", otp, 300)
+                cache.set(f"otp_{phone_number}", otp, OTP_TTL)
+                reset_otp_tries(phone_number)
                 
                 # Set cooldown
                 cache.set(f"otp_cooldown_{phone_number}", True, 60)
@@ -122,12 +167,16 @@ class SignupRequestView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class SignupValidateOTPView(APIView):
+    throttle_scope = 'otp_verify'
     def post(self, request):
         serializer = OTPValidateSerializer(data=request.data)
         if serializer.is_valid():
             phone_number = serializer.validated_data['phone_number']
             otp = serializer.validated_data['otp']
-            
+
+            if otp_attempts_exhausted(phone_number):
+                return Response(TOO_MANY_TRIES, status=status.HTTP_429_TOO_MANY_REQUESTS)
+
             stored_otp = cache.get(f"otp_{phone_number}")
             user_data = cache.get(f"signup_{phone_number}")
             
@@ -150,6 +199,7 @@ class SignupValidateOTPView(APIView):
                     "message": "کاربر با موفقیت ایجاد شد"
                 }, status=status.HTTP_201_CREATED)
                 
+            register_failed_otp(phone_number)
             return Response({"message": "کد را به درستی وارد نکرده اید."}, status=status.HTTP_400_BAD_REQUEST)
         return Response({"message": "اطلاعات به درستی ارسال نشده است"}, status=status.HTTP_400_BAD_REQUEST)
 

@@ -23,6 +23,7 @@ from rest_framework_simplejwt.views import (
     TokenRefreshView,
 )
 import nested_admin
+from UserManager.views import ThrottledTokenObtainPairView
 
 admin.site.site_title = "پنل ادمین راه و رسم"
 admin.site.site_header = "آژانس مسافرتی راه و رسم"
@@ -37,7 +38,7 @@ urlpatterns = [
     path('visa/', include('VisaManager.urls')),
     path('hotels/', include('HotelManager.urls')),
     path('api/', include('misc.urls')),
-    path('token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
+    path('token/', ThrottledTokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('reserve/', include('ReserveManager.urls')),
 ]

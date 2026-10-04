@@ -26,16 +26,23 @@ class Reserve(models.Model):
         verbose_name = "رزرو"
         verbose_name_plural = "رزرو ها"
     
-    def save(self, *args, **kwargs):
+    def calculate_final_price(self):
+        """Total computed from the quantities and the hotel price (idempotent)."""
+        hp = self.hotel_price
+        total = 0
+        if self.two_bed_quantity > 0:
+            total += hp.two_bed_price * self.two_bed_quantity
+        if self.one_bed_quantity > 0:
+            total += hp.one_bed_price * self.one_bed_quantity
+        if self.child_with_bed_quantity > 0:
+            total += hp.child_with_bed_price * self.child_with_bed_quantity
+        if self.child_no_bed_quantity > 0:
+            total += hp.child_no_bed_price * self.child_no_bed_quantity
+        return total
 
-        if self.two_bed_quantity>0:
-            self.final_price = self.final_price + self.hotel_price.two_bed_price * self.two_bed_quantity
-        if self.one_bed_quantity>0:
-            self.final_price = self.final_price + self.hotel_price.one_bed_price * self.one_bed_quantity
-        if self.child_with_bed_quantity>0:
-            self.final_price = self.final_price + self.hotel_price.child_with_bed_price * self.child_with_bed_quantity
-        if self.child_no_bed_quantity>0:
-            self.final_price = self.final_price + self.hotel_price.child_no_bed_price * self.child_no_bed_quantity
+    def save(self, *args, **kwargs):
+        # Recompute from components on every save so re-saving never inflates the price.
+        self.final_price = self.calculate_final_price()
         super(Reserve, self).save(*args, **kwargs)
 
 

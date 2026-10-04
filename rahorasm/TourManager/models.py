@@ -128,7 +128,7 @@ class Tour(models.Model):
     max_price_currency = models.DecimalField(max_digits=20, decimal_places=2, null=True, blank=True, verbose_name="نرخ ارزی بیشترین قیمت تور")
     other_currency = models.CharField(max_length=200, verbose_name="ارز دیگر", null=True, blank=True)
 
-    flight_times = models.ManyToManyField(FlightTimes, related_name='tour_flights', verbose_name="زمان پرواز", null=True, blank=True)
+    flight_times = models.ManyToManyField(FlightTimes, related_name='tour_flights', verbose_name="زمان پرواز", blank=True)
     
     created_at = jmodels.jDateTimeField(auto_now_add=True)
     edited_at = jmodels.jDateTimeField(auto_now=True)

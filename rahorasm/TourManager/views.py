@@ -286,12 +286,11 @@ class Filters(APIView):
 from weasyprint import HTML, CSS
 from django.template.loader import get_template
 from django.http import HttpResponse
+from django.shortcuts import get_object_or_404
 from django.template.loader import render_to_string
 
 def TourPDF(request, pk):
-    tour = Tour.objects.get(pk=pk)
-    if not tour:
-        return HttpResponse(status=404)
+    tour = get_object_or_404(Tour, pk=pk)
     html_string = render_to_string('tour.html', {'tour': tour})
     html = HTML(string=html_string, base_url=request.build_absolute_uri())
     pdf = html.write_pdf(presentational_hints=True)

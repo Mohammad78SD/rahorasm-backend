@@ -73,6 +73,15 @@ REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (
         "rest_framework_simplejwt.authentication.JWTAuthentication",
     ),
+    # Scoped throttling: views opt in with `throttle_scope` (see UserManager.views).
+    "DEFAULT_THROTTLE_CLASSES": (
+        "rest_framework.throttling.ScopedRateThrottle",
+    ),
+    "DEFAULT_THROTTLE_RATES": {
+        "login": "10/min",
+        "otp_request": "5/hour",
+        "otp_verify": "10/min",
+    },
 }
 
 SIMPLE_JWT = {
@@ -197,6 +206,7 @@ CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOWED_ORIGINS = env.list("CORS_ALLOWED_ORIGINS", default=[])
 
 
+# Wrong OTP guesses allowed per issued code before it is invalidated.
 MAX_OTP_TRY = 3
 AUTH_USER_MODEL = "UserManager.UserModel"
 
