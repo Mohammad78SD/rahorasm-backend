@@ -1,3 +1,26 @@
-/rahorasm-env
+# Python
+__pycache__/
+*.py[cod]
+
+# Environment / secrets
+.env
+*.env
+!.env.example
+
+# Virtual environments
+rahorasm-env/
 venv/
-conf/
+.venv/
+env/
+
+# Local data and generated files
+*.sqlite3
+db.sqlite3
+media/
+staticfiles/
+static/
+
+# Editors / OS
+.vscode/
+.idea/
+.DS_Store

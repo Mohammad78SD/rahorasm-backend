@@ -20,20 +20,29 @@
     
     
 from django.conf import settings
-from ippanel import Client, Error, HTTPError, ResponseCode
+from ippanel import Client
+
+
+def _client():
+    return Client(settings.IPPANEL_API_KEY)
+
 
 def send_otp(phone, otp):
-    
-    client = Client("8en9TUYaGHPVU-gCdUSCCe4XxHuZhZUp62SQTIkY7ho=")
-    ptrn = {
-        'code': otp
-        }
-
-    client.send_pattern('zz9qp2vzfbtairt', "+983000505", str(phone), ptrn)
-        
+    _client().send_pattern(
+        settings.IPPANEL_OTP_PATTERN,
+        settings.IPPANEL_ORIGINATOR,
+        str(phone),
+        {'code': otp},
+    )
     return True
 
+
 def send_sms(phone_number, ptrn):
-    client = Client("8en9TUYaGHPVU-gCdUSCCe4XxHuZhZUp62SQTIkY7ho=")
+    client = _client()
     for num in phone_number:
-        client.send_pattern('bxzxz3df41xdvfm', "+983000505", str(num), ptrn)
+        client.send_pattern(
+            settings.IPPANEL_NOTIFY_PATTERN,
+            settings.IPPANEL_ORIGINATOR,
+            str(num),
+            ptrn,
+        )

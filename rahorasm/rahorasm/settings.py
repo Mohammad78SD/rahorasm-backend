@@ -19,10 +19,15 @@ from datetime import timedelta
 import environ
 
 env = environ.Env()
-environ.Env.read_env()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+# Load variables from a .env file next to manage.py (preferred) and, for
+# backwards compatibility, from one next to this settings module.
+# Real environment variables always take precedence.
+environ.Env.read_env(BASE_DIR / ".env")
+environ.Env.read_env(Path(__file__).resolve().parent / ".env")
 
 
 # Quick-start development settings - unsuitable for production
@@ -32,9 +37,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = env("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = env.bool("DEBUG", default=False)
 
-ALLOWED_HOSTS = ["*"]
+# Comma-separated list, e.g. "api.example.com,localhost"
+ALLOWED_HOSTS = env.list("ALLOWED_HOSTS", default=[])
 
 
 # Application definition
@@ -121,8 +127,8 @@ DATABASES = {
         'NAME': env("DB_NAME"),
         'USER': env("DB_USER"),
         'PASSWORD': env("DB_PASSWORD"),
-        'HOST': env("DB_HOST"),
-        'PORT': env("DB_PORT"),
+        'HOST': env("DB_HOST", default="localhost"),
+        'PORT': env("DB_PORT", default="5432"),
     }
 }
 
@@ -148,7 +154,7 @@ AUTH_PASSWORD_VALIDATORS = [
 CACHES = {
     "default": {
         "BACKEND": "django_redis.cache.RedisCache",
-        "LOCATION": "redis://5.161.155.143:6379/2",
+        "LOCATION": env("REDIS_URL", default="redis://127.0.0.1:6379/2"),
         "OPTIONS": {
             "CLIENT_CLASS": "django_redis.client.DefaultClient",
         },
@@ -173,7 +179,7 @@ USE_TZ = True
 
 STATIC_URL = "/static/"
 # Directory where collectstatic will gather all static files for production
-STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")  # Adjust the path as needed
+STATIC_ROOT = env("STATIC_ROOT", default=os.path.join(BASE_DIR, "staticfiles"))
 # Directory for development static files
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, "static"),
@@ -184,12 +190,11 @@ STATICFILES_DIRS = [
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOW_ALL_ORIGINS = env.bool("CORS_ALLOW_ALL_ORIGINS", default=False)
 CORS_ALLOW_CREDENTIALS = True
 
-CORS_ALLOWED_ORIGINS = [
-    "https://rahorasm-agency.vercel.app",  # Adjust this to your frontend's URL
-]
+# Comma-separated list of frontend origins, e.g. "https://app.example.com"
+CORS_ALLOWED_ORIGINS = env.list("CORS_ALLOWED_ORIGINS", default=[])
 
 
 MAX_OTP_TRY = 3
@@ -197,7 +202,7 @@ AUTH_USER_MODEL = "UserManager.UserModel"
 
 
 MEDIA_URL = "/media/"
-MEDIA_ROOT = os.path.join(BASE_DIR, "media")
+MEDIA_ROOT = env("MEDIA_ROOT", default=os.path.join(BASE_DIR, "media"))
 
 customColorPalette = [
     {"color": "hsl(4, 90%, 58%)", "label": "Red"},
@@ -350,11 +355,17 @@ CKEDITOR_5_ALLOW_ALL_FILE_TYPES = True
 CKEDITOR_ALLOWED_IMAGE_EXTENSIONS = ["jpg", "jpeg", "png", "gif", "webp"]
 
 
-CSRF_TRUSTED_ORIGINS = [
-    "https://rahorasm-agency.vercel.app",  # Replace with your actual domain
-]
+# Comma-separated list of trusted origins, e.g. "https://app.example.com"
+CSRF_TRUSTED_ORIGINS = env.list("CSRF_TRUSTED_ORIGINS", default=[])
 
 CSRF_COOKIE_NAME = "csrftoken"  # Default value
 CSRF_COOKIE_HTTPONLY = False  # Ensure this is False to access the cookie via JavaScript
-CSRF_COOKIE_SECURE = True  # Set to True if using HTTPS
-SESSION_COOKIE_SECURE = True
+# Secure cookies require HTTPS; set to False only for plain-HTTP local development.
+CSRF_COOKIE_SECURE = env.bool("CSRF_COOKIE_SECURE", default=True)
+SESSION_COOKIE_SECURE = env.bool("SESSION_COOKIE_SECURE", default=True)
+
+# SMS (IPPanel) used for OTP delivery
+IPPANEL_API_KEY = env("IPPANEL_API_KEY", default="")
+IPPANEL_ORIGINATOR = env("IPPANEL_ORIGINATOR", default="+983000505")
+IPPANEL_OTP_PATTERN = env("IPPANEL_OTP_PATTERN", default="")
+IPPANEL_NOTIFY_PATTERN = env("IPPANEL_NOTIFY_PATTERN", default="")
