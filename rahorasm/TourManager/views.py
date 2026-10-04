@@ -322,7 +322,6 @@ class NavbarAPIView(APIView):
                     multi_destination_countries.append(destination['country']['name'])
         
         occasions = Tour.objects.values('occasion').exclude(occasion__isnull=True).distinct()
-        print(occasions)
         
         navbar = []
         occasions_links = {
