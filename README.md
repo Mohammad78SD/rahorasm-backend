@@ -126,7 +126,7 @@ Settings are read with `django-environ` from `rahorasm/.env` (see `.env.example`
 
 ## Status and limitations
 
-- No online payment gateway is integrated; the `paid` reservation status exists but is set manually (admin).
+- No online payment gateway is integrated; the `paid` reservation status exists but is not changed by any code in this repository.
 - Test modules are present but contain no tests yet.
 
 ## License
