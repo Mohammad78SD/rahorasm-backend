@@ -104,4 +104,53 @@ class ReserveApiTests(APITestCase):
         other = make_user("09120000002")
         r = make_reserve(other, self.tour, self.hp, two_bed_quantity=1)
         self.client.force_authenticate(self.user)
-        self.assertEqual(self.client.get(reverse("retrieve-reserve", args=[r.id])).status_code, 400)
+        self.assertEqual(self.client.get(reverse("retrieve-reserve", args=[r.id])).status_code, 404)
+
+    def test_retrieve_unknown_reserve_is_404(self):
+        self.client.force_authenticate(self.user)
+        self.assertEqual(self.client.get(reverse("retrieve-reserve", args=[99999])).status_code, 404)
+
+    def post(self, payload):
+        self.client.force_authenticate(self.user)
+        return self.client.post(reverse("create-reserve"), payload, format="json")
+
+    def test_malformed_count_entries_are_400(self):
+        for bad in ([{"count": 1}], [{"identitication": "two_bed_price"}], ["x"],
+                    [{"identitication": "bogus", "count": 1}], "nope", []):
+            self.payload["count"] = bad
+            self.assertEqual(self.post(self.payload).status_code, 400, bad)
+        self.assertEqual(Reserve.objects.count(), 0)
+
+    def test_non_positive_or_non_integer_quantities_are_400(self):
+        for qty in (0, -3, "abc", 1.5):
+            self.payload["count"] = [{"identitication": "two_bed_price", "count": qty}]
+            self.assertEqual(self.post(self.payload).status_code, 400, qty)
+        self.assertEqual(Reserve.objects.count(), 0)
+
+    def test_incomplete_person_is_400(self):
+        self.payload["count"][0]["users"] = [{"name": "علی"}]
+        self.assertEqual(self.post(self.payload).status_code, 400)
+
+    def test_hotel_price_must_belong_to_flight_time(self):
+        self.payload["hotel_price_id"] = make_hotel_price().id  # exists, but not on self.ft
+        resp = self.post(self.payload)
+        self.assertEqual(resp.status_code, 400)
+        self.assertIn("hotel_price_id", resp.json())
+
+    def test_flight_time_shared_by_two_tours(self):
+        other = make_tour(flight_times=self.ft)
+        resp = self.post(self.payload)  # ambiguous, used to be a 500
+        self.assertEqual(resp.status_code, 400)
+        self.assertIn("tour_id", resp.json())
+        self.payload["tour_id"] = other.id
+        self.assertEqual(self.post(self.payload).status_code, 201)
+        self.assertEqual(Reserve.objects.get().tour, other)
+
+    def test_tour_id_must_match_flight_time(self):
+        self.payload["tour_id"] = make_tour().id  # not linked to self.ft
+        self.assertEqual(self.post(self.payload).status_code, 400)
+
+    def test_flight_time_without_tour_is_400(self):
+        orphan = make_flight_times(self.hp)
+        self.payload["flight_time_id"] = orphan.id
+        self.assertEqual(self.post(self.payload).status_code, 400)

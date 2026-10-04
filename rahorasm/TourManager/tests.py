@@ -66,8 +66,11 @@ class TourPDFTests(TestCase):
         """Regression: unknown id used to raise Tour.DoesNotExist -> 500."""
         self.assertEqual(self.client.get(reverse("tour_pdf", args=[99999])).status_code, 404)
 
-    def test_existing_tour_renders(self):
+    def test_existing_tour_returns_pdf(self):
+        """Regression: a debug leftover used to return the HTML instead of the PDF."""
         tour = make_tour(title="PDF Tour")
         resp = self.client.get(reverse("tour_pdf", args=[tour.id]))
         self.assertEqual(resp.status_code, 200)
-        self.assertIn("PDF Tour", resp.content.decode())
+        self.assertEqual(resp["Content-Type"], "application/pdf")
+        self.assertTrue(resp.content.startswith(b"%PDF"))
+        self.assertIn(f"tour-{tour.id}.pdf", resp["Content-Disposition"])

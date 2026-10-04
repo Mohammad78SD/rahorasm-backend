@@ -146,6 +146,48 @@ class SignupTests(AuthTestBase):
         self.assertEqual(self.client.post(url, {"phone_number": PHONE, "otp": otp}).status_code, 429)
         self.assertFalse(UserModel.objects.filter(phone_number=PHONE).exists())
 
+    def test_signup_request_cooldown_blocks_repeat(self):
+        url = reverse("signup_request")
+        self.assertEqual(self.client.post(url, self.data).status_code, 200)
+        self.assertEqual(self.client.post(url, self.data).status_code, 429)
+        self.assertEqual(self.send_otp.call_count, 1)
+        cache.delete(f"otp_cooldown_{PHONE}")
+        self.assertEqual(self.client.post(url, self.data).status_code, 200)
+        self.assertEqual(self.send_otp.call_count, 2)
+
+
+class ProfileTests(AuthTestBase):
+    def setUp(self):
+        super().setUp()
+        self.user = make_user(PHONE, "old-pass-123", name="Old")
+        self.client.force_authenticate(self.user)
+        self.url = reverse("user_profile")
+
+    def test_update_name_and_email_keeps_password(self):
+        """Regression: the stored hash used to be re-hashed, locking the user out."""
+        resp = self.client.put(self.url, {"name": "New", "email": "a@b.co"})
+        self.assertEqual(resp.status_code, 200)
+        self.user.refresh_from_db()
+        self.assertEqual((self.user.name, self.user.email), ("New", "a@b.co"))
+        self.assertTrue(self.user.check_password("old-pass-123"))
+        self.client.force_authenticate(None)
+        resp = self.client.post(reverse("login"), {"phone_number": PHONE, "password": "old-pass-123"})
+        self.assertEqual(resp.status_code, 200)
+
+    def test_password_change_requires_current_password(self):
+        resp = self.client.put(self.url, {"password": "brand-new-1"})
+        self.assertEqual(resp.status_code, 400)
+        resp = self.client.put(self.url, {"password": "brand-new-1", "current_password": "wrong"})
+        self.assertEqual(resp.status_code, 400)
+        self.user.refresh_from_db()
+        self.assertTrue(self.user.check_password("old-pass-123"))
+
+    def test_password_change_with_current_password(self):
+        resp = self.client.put(self.url, {"password": "brand-new-1", "current_password": "old-pass-123"})
+        self.assertEqual(resp.status_code, 200)
+        self.user.refresh_from_db()
+        self.assertTrue(self.user.check_password("brand-new-1"))
+
 
 class SessionTests(AuthTestBase):
     def test_user_session_requires_auth(self):

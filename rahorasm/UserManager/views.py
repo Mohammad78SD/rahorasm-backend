@@ -146,6 +146,9 @@ class SignupRequestView(APIView):
             try:
                 user = User.objects.get(phone_number=phone_number)
             except User.DoesNotExist:
+                if cache.get(f"otp_cooldown_{phone_number}"):
+                    return Response({"message": "کد یکبار مصرف به تازگی ارسال شده لطفا چند دقیقه دیگر مجددا تلاش نمایید"},
+                                    status=status.HTTP_429_TOO_MANY_REQUESTS)
 
                 # Store user data temporarily
                 cache.set(f"signup_{serializer.validated_data['phone_number']}", serializer.validated_data, 300)
@@ -243,24 +246,23 @@ class UserProfileView(APIView):
             
         def put(self, request):
             user = request.user
-            if user.is_authenticated:
-                name = request.data.get('name', user.name)
-                email = request.data.get('email', user.email)
-                password = request.data.get('password', user.password)
+            name = request.data.get('name')
+            email = request.data.get('email')
+            new_password = request.data.get('password')
 
-                if name is not None:
-                    user.name = name
-                if email is not None:
-                    user.email = email
-                if password is not None:
-                    user.set_password(password)
-                user.save()
-                return Response({"message": "اطلاعات کاربری با موفقیت به روز رسانی شد"}, status=status.HTTP_200_OK)
-            else:
-                return Response({"message": "User is not authenticated"}, status=status.HTTP_401_UNAUTHORIZED)
-            
-        
-        
+            # Changing the password requires proving knowledge of the current one.
+            if new_password is not None:
+                if not user.check_password(request.data.get('current_password') or ''):
+                    return Response({"message": "گذرواژه فعلی اشتباه است"}, status=status.HTTP_400_BAD_REQUEST)
+                user.set_password(new_password)
+            if name is not None:
+                user.name = name
+            if email is not None:
+                user.email = email
+            user.save()
+            return Response({"message": "اطلاعات کاربری با موفقیت به روز رسانی شد"}, status=status.HTTP_200_OK)
+
+
 class ContactUsView(generics.CreateAPIView):
     queryset = ContactForm.objects.all()
     serializer_class = ContactUsSerializer

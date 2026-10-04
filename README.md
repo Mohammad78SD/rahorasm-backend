@@ -55,19 +55,19 @@ Routes are derived from the URL configuration. Auth column: JWT = `Authorization
 | POST | `/auth/signup/request` | - | Start signup, send OTP |
 | POST | `/auth/signup/validate` | - | Verify OTP, create user, returns tokens |
 | GET | `/auth/user-session` | JWT | Current user summary |
-| GET, PUT | `/auth/user-profile` | JWT | Read / update profile |
+| GET, PUT | `/auth/user-profile` | JWT | Read / update profile (`name`, `email`; changing `password` also needs `current_password`) |
 | POST | `/auth/contact-us` | - | Submit contact form |
 | GET | `/tour/tours/` | - | List tours (filter by city, country, continent, featured, occasion, ...) |
 | GET | `/tour/tour/<id>/` | - | Tour detail |
 | GET | `/tour/flights/<id>/` | - | Flights for a tour |
 | GET | `/tour/flight/<id>/` | - | Flight detail |
-| GET | `/tour/pdf/<id>/` | - | Tour as PDF |
+| GET | `/tour/pdf/<id>/` | - | Tour as a PDF download (`application/pdf`) |
 | GET | `/tour/cities/`, `/tour/countries/`, `/tour/airlines/`, `/tour/airports/` | - | Reference lists (name filters) |
 | GET | `/tour/filters/` | - | Available filter values |
 | GET | `/tour/navbar/`, `/tour/home/` | - | Aggregated data for navbar / home page |
 | GET | `/hotels/`, `/hotels/<id>/` | - | Hotel list / detail |
-| POST | `/reserve/new/` | JWT | Create a reservation |
-| GET | `/reserve/list/`, `/reserve/<id>/` | JWT | The user's reservations |
+| POST | `/reserve/new/` | JWT | Create a reservation: body `flight_time_id`, `hotel_price_id`, optional `tour_id`, `count` (list of `{identitication, count >= 1, users}`); invalid input returns 400 with field errors |
+| GET | `/reserve/list/`, `/reserve/<id>/` | JWT | The user's reservations (404 if not found / not yours) |
 | GET | `/visa/list/`, `/visa/search/`, `/visa/<id>/` | - | Visa list, search, detail |
 | GET | `/blog/posts/`, `/blog/posts/<id>/` | - | Posts |
 | GET, POST | `/blog/posts/<post_id>/comments/` | - | Comments |
@@ -76,7 +76,7 @@ Routes are derived from the URL configuration. Auth column: JWT = `Authorization
 
 ## Authentication
 
-Authentication is JWT-only (`rest_framework_simplejwt` is the sole DRF authentication class). Access tokens last 5 minutes and refresh tokens 1 day, with refresh rotation and blacklisting enabled in settings. OTP codes (6 digits, 5-minute expiry, 60-second resend cooldown, at most `MAX_OTP_TRY` = 3 wrong guesses per code) and pending signup data are stored in the Redis cache and sent by SMS through IPPanel. Login, OTP request and OTP verification endpoints (including `/token/`) are rate limited with DRF scoped throttling (`login` 10/min, `otp_request` 5/hour, `otp_verify` 10/min, per client IP or user; see `REST_FRAMEWORK` in settings). Throttle counters use the default cache, and the client IP is taken from `REMOTE_ADDR`, so behind a reverse proxy configure the proxy/`NUM_PROXIES` accordingly.
+Authentication is JWT-only (`rest_framework_simplejwt` is the sole DRF authentication class). Access tokens last 5 minutes and refresh tokens 1 day, with refresh rotation and blacklisting enabled in settings. OTP codes (6 digits, 5-minute expiry, 60-second resend cooldown (shared by login and signup OTP requests), at most `MAX_OTP_TRY` = 3 wrong guesses per code) and pending signup data are stored in the Redis cache and sent by SMS through IPPanel. Login, OTP request and OTP verification endpoints (including `/token/`) are rate limited with DRF scoped throttling (`login` 10/min, `otp_request` 5/hour, `otp_verify` 10/min, per client IP or user; see `REST_FRAMEWORK` in settings). Throttle counters use the default cache, and the client IP is taken from `REMOTE_ADDR`, so behind a reverse proxy configure the proxy/`NUM_PROXIES` accordingly.
 
 ## Getting started
 
@@ -142,6 +142,7 @@ Settings are read with `django-environ` from `rahorasm/.env` (see `.env.example`
 
 - No online payment gateway is integrated; the `paid` reservation status exists but is not changed by any code in this repository.
 - Reservation `final_price` is always recomputed from the quantities and the selected hotel price on save; manual overrides in the admin are not kept.
+- A flight time may be shared by several tours; `/reserve/new/` then requires `tour_id` (400 otherwise). The number of passenger entries is not checked against the quantities.
 
 ## License
 

@@ -297,9 +297,8 @@ def TourPDF(request, pk):
 
     # Return the PDF as a response
     response = HttpResponse(pdf, content_type='application/pdf')
-    response['Content-Disposition'] = f'attachment; filename="tour-{tour.title}.pdf"'
+    response['Content-Disposition'] = f'attachment; filename="tour-{tour.pk}.pdf"'
 
-    return HttpResponse(html_string)
     return response
     
     
