@@ -1,5 +1,7 @@
 # RahoRasm Backend
 
+[![CI](https://github.com/Mohammad78SD/rahorasm-backend/actions/workflows/ci.yml/badge.svg)](https://github.com/Mohammad78SD/rahorasm-backend/actions/workflows/ci.yml)
+
 Django REST API for **RahoRasm**, a Persian-language tour booking platform: tours with flights and hotel pricing, visa information, a blog, OTP-based phone authentication with JWT, and a reservation flow.
 
 The web frontend is a separate Nuxt project: [Mohammad78SD/rahorasm](https://github.com/Mohammad78SD/rahorasm).
@@ -21,7 +23,7 @@ The web frontend is a separate Nuxt project: [Mohammad78SD/rahorasm](https://git
 
 - Python, Django 5.1, Django REST Framework
 - `djangorestframework-simplejwt` (JWT), `django-filter`, `django-cors-headers`
-- PostgreSQL (`psycopg2`), Redis cache (`django-redis`)
+- PostgreSQL (`psycopg2-binary`), Redis cache (`django-redis`)
 - `django-ckeditor-5`, `django-jalali`, `django-nested-admin`
 - WeasyPrint (PDF), `ippanel` (SMS), Pillow
 
@@ -74,7 +76,7 @@ Routes are derived from the URL configuration. Auth column: JWT = `Authorization
 
 ## Authentication
 
-Authentication is JWT-only (`rest_framework_simplejwt` is the sole DRF authentication class). Access tokens last 5 minutes and refresh tokens 1 day, with refresh rotation and blacklisting enabled in settings. OTP codes (6 digits, 5-minute expiry, 60-second resend cooldown) and pending signup data are stored in the Redis cache and sent by SMS through IPPanel.
+Authentication is JWT-only (`rest_framework_simplejwt` is the sole DRF authentication class). Access tokens last 5 minutes and refresh tokens 1 day, with refresh rotation and blacklisting enabled in settings. OTP codes (6 digits, 5-minute expiry, 60-second resend cooldown, at most `MAX_OTP_TRY` = 3 wrong guesses per code) and pending signup data are stored in the Redis cache and sent by SMS through IPPanel. Login, OTP request and OTP verification endpoints (including `/token/`) are rate limited with DRF scoped throttling (`login` 10/min, `otp_request` 5/hour, `otp_verify` 10/min, per client IP or user; see `REST_FRAMEWORK` in settings). Throttle counters use the default cache, and the client IP is taken from `REMOTE_ADDR`, so behind a reverse proxy configure the proxy/`NUM_PROXIES` accordingly.
 
 ## Getting started
 
@@ -99,7 +101,19 @@ The API is then available at http://127.0.0.1:8000/ and the admin at http://127.
 
 For local HTTP development set `DEBUG=True` and `CSRF_COOKIE_SECURE=False` / `SESSION_COOKIE_SECURE=False` in `.env`.
 
-Note: the pinned `psycopg2==2.9.9` does not build from source on Python 3.13+; use Python 3.12 or install `psycopg2-binary`.
+Note: `requirements.txt` uses `psycopg2-binary` (prebuilt wheels, no `libpq` headers needed); the former `psycopg2==2.9.9` pin did not build from source on Python 3.13+. Python 3.12 is still the tested version.
+
+## Running tests
+
+Tests use sqlite and an in-memory cache (`rahorasm/rahorasm/test_settings.py`), so no PostgreSQL, Redis or `.env` file is needed, and the SMS provider is mocked. WeasyPrint still needs its system libraries (Pango).
+
+```bash
+pip install -r requirements-dev.txt
+cd rahorasm
+pytest
+```
+
+GitHub Actions (`.github/workflows/ci.yml`) runs the same command on Python 3.12 for every push to `main` and every pull request.
 
 ## Environment variables
 
@@ -127,7 +141,7 @@ Settings are read with `django-environ` from `rahorasm/.env` (see `.env.example`
 ## Status and limitations
 
 - No online payment gateway is integrated; the `paid` reservation status exists but is not changed by any code in this repository.
-- Test modules are present but contain no tests yet.
+- Reservation `final_price` is always recomputed from the quantities and the selected hotel price on save; manual overrides in the admin are not kept.
 
 ## License
 
