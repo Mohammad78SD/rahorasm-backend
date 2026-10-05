@@ -4,7 +4,7 @@
 
 Django REST API for **RahoRasm**, a Persian-language tour booking platform: tours with flights and hotel pricing, visa information, a blog, OTP-based phone authentication with JWT, and a reservation flow.
 
-The web frontend is a separate Nuxt project: [Mohammad78SD/rahorasm](https://github.com/Mohammad78SD/rahorasm).
+The web frontend is a separate Nuxt project built by [@mahd1ar](https://github.com/mahd1ar): [mahd1ar/rahorasm](https://github.com/mahd1ar/rahorasm). This repository is the backend I built.
 
 > TODO: add a live demo URL and screenshots (e.g. Django admin and API responses).
 
